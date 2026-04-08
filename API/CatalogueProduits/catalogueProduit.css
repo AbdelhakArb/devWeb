@@ -1,0 +1,91 @@
+/* 1. Configuration de la Grille */
+.products-grid {
+    display: grid;
+    /* Crée des colonnes de minimum 250px qui s'adaptent à l'espace */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px; /* Espace entre les cartes */
+    padding: 20px;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* Style de la zone de détail (la grosse carte) */
+#productCard {
+    display: none; 
+    position: fixed;      /* Reste fixé à l'écran même si on scrolle */
+    top: 50%;             /* Centrage vertical */
+    left: 50%;            /* Centrage horizontal */
+    transform: translate(-50%, -50%); /* Ajustement parfait du centre */
+    z-index: 1000;        /* Passe au-dessus de la liste */
+    
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5); /* Ombre pour l'effet de profondeur */
+    width: 90%;
+    max-width: 400px;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Optionnel : Un fond sombre derrière la carte pour mieux voir */
+#modalOverlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+}
+
+#productCard img {
+    border-radius: 8px;
+    margin-bottom: 2px;
+    width:150px;
+    height:150px;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* 3. Style de l'Image */
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover; /* Garde les proportions sans déformer */
+}
+
+/* 4. Infos et Typographie */
+.product-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.product-info h3 {
+    margin: 10px 0;
+    font-size: 1.1rem;
+}
+td {
+    padding: 5px;
+     width: fit-content;
+     white-space: nowrap;
+}
+.price {
+    color: #e44d26;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+button {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+#loadMoreTrigger {
+    height: 50px;
+    width: 100%;
+}

@@ -1,0 +1,27 @@
+typeScript > est un sur ensemble de javascript qui ajoute des foncionnalite de typage statique, on transpile 
+
+pourquoi ? 
+ detect l'erreur avet execution 
+
+
+
+- commande pour les run tsc main.ts || node main.js
+
+adresse?: string;  >>> optionel ou alors ca peu etre null 
+
+les ":" c'est pour typer un 
+
+getter et setter constructeur et les methodes vont dans la class
+
+dans une class les attributes sont private
+heritage >> utilisation de extends 
+class heritie extends parent
+
+ex: class etudiant extends Personne
+
+utilisation de super. pour appeler le constructeur du pearent  pour acceder a la methode de la class principale. 
+
+ng new ProjectName
+ng serve -o > start angular server and redirect to webpage
+
+ng g c composansName  pour creer  un composant
