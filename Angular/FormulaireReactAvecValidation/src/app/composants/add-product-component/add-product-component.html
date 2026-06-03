@@ -1,0 +1,31 @@
+<h2>Ajouter un produit</h2>
+
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+        <label for="title">Product title</label>
+        <input formControlName="title" class="form-control" id="title" placeholder="Enter product title">
+        @if (registerForm.get('title')?.invalid && registerForm.get('title')?.touched)
+           { <div class="alert alert-danger">
+                Product title is required
+            </div>}
+        <label for="price">Product price</label>
+        <input  formControlName="price" class="form-control" id="price" placeholder="Enter product price">
+        @if (registerForm.get('price')?.invalid && registerForm.get('price')?.touched)
+        {
+             <div class="alert alert-danger">
+                Product price is required and must be a positive number
+            </div>
+        }
+        <label for="description">Product description</label>
+        <textarea formControlName="description" class="form-control" id="description" placeholder="Enter product description"></textarea>
+        @if (registerForm.get('description')?.invalid && registerForm.get('description')?.touched)
+            {<div class="alert alert-danger">
+                Product description is required and must be at least 10 characters long
+            </div>}
+        <button type="submit" class="btn btn-primary" [disabled]="registerForm.invalid">Submit</button>  
+    </div>
+</form>
+
+<div>
+    <p>{{newProduct()?.title}}</p>
+</div>
