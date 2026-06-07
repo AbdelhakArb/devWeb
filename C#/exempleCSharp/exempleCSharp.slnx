@@ -1,6 +1,0 @@
-<Solution>
-  <Folder Name="/exempleCSharp/" />
-  <Project Path="exempleCSharp/exempleCSharp.csproj" />
-  <Project Path="Exercice3/Exercice3.csproj" />
-  <Project Path="ExerciceDeux/ExerciceDeux.csproj" />
-</Solution>
