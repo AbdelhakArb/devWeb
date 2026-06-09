@@ -1,49 +1,71 @@
 using Dapper;
-using Infra.Models;
-using Infra.Repositories.Abstractions;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
+using ListeDeNaissance.Core.IGateways;
+using CoreModels = ListeDeNaissance.Core.Models; // Alias propre pour les modèles du Core
 
 namespace Infra.Repositories
 {
-    public class ListeDeNaissanceRepository : IListeDeNaissanceRepository
+    public class ListeDeNaissanceRepository : IListeDeNaissanceGateway
     {
         private readonly string _connectionString;
 
-        // Le constructeur récupère la chaîne de connexion de la base de données, comme chez ton prof
         public ListeDeNaissanceRepository(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection") ??
-                throw new ArgumentNullException(nameof(configuration), "Database connection string 'DefaultConnection' not found.");
+                throw new ArgumentNullException(nameof(configuration), "La chaîne de connexion MySQL 'DefaultConnection' est introuvable.");
         }
 
-        // Cette méthode permet d'ouvrir proprement une connexion à MySQL
         private MySqlConnection GetConnection() => new MySqlConnection(_connectionString);
 
-        // 1. Récupérer une liste par son Identifiant unique
-        public ListeDeNaissance? GetListeById(int listeId)
+        // 1. Créer une liste (CORRIGÉ : Ajout de la colonne manquante datePrevuPourAccouchement)
+        public async Task CreerListeAsync(CoreModels.ListeDeNaissance liste)
+        {
+            using var connection = GetConnection();
+            var sql = @"INSERT INTO listedenaissance (nomListeDeNaissance, dateCreationListe, statusListe, compteParentId, datePrevuPourAccouchement) 
+                        VALUES (@NomListeDeNaissance, @DateCreationListe, @StatusListe, @CompteParentId, @DatePrevuPourAccouchement);";
+
+            // Dapper va lire les propriétés de l'objet du Core pour exécuter le SQL
+            await connection.ExecuteAsync(sql, liste);
+        }
+
+        // 2. Obtenir une liste par son Identifiant unique
+        public async Task<CoreModels.ListeDeNaissance?> ObtenirListeParIdAsync(int listeId)
         {
             using var connection = GetConnection();
             var sql = "SELECT * FROM listedenaissance WHERE idListeDeNaissance = @Id";
-            return connection.QuerySingleOrDefault<ListeDeNaissance>(sql, new { Id = listeId });
+            
+            // On demande à Dapper de mapper directement le résultat SQL dans le modèle du Core
+            return await connection.QuerySingleOrDefaultAsync<CoreModels.ListeDeNaissance>(sql, new { Id = listeId });
         }
 
-        // 2. Récupérer toutes les listes d'un parent spécifique (Règle : un parent peut en avoir plusieurs !)
-        public IEnumerable<ListeDeNaissance> GetListesByParentId(int compteParentId)
+        // 3. Obtenir toutes les listes d'un parent
+        public async Task<List<CoreModels.ListeDeNaissance>> ObtenirListesParParentIdAsync(int compteParentId)
         {
             using var connection = GetConnection();
             var sql = "SELECT * FROM listedenaissance WHERE compteParentId = @ParentId";
-            return connection.Query<ListeDeNaissance>(sql, new { ParentId = compteParentId });
+            
+            var result = await connection.QueryAsync<CoreModels.ListeDeNaissance>(sql, new { ParentId = compteParentId });
+            return result.AsList();
         }
 
-        // 3. Insérer (Créer) une nouvelle liste de naissance dans MySQL
-        public void CreateListe(ListeDeNaissance liste)
+        // 4. Obtenir une liste via son code de partage ou lien unique
+        public async Task<CoreModels.ListeDeNaissance?> ObtenirListeParCodeOuLienAsync(string code)
         {
             using var connection = GetConnection();
-            var sql = @"INSERT INTO listedenaissance (nomListeDeNaissance, dateCreationListe, statusListe, compteParentId) 
-                        VALUES (@NomListeDeNaissance, @DateCreationListe, @StatusListe, @CompteParentId);";
+            var sql = "SELECT * FROM listedenaissance WHERE codeUniqueListe = @Code"; 
+            
+            return await connection.QuerySingleOrDefaultAsync<CoreModels.ListeDeNaissance>(sql, new { Code = code });
+        }
 
-            connection.Execute(sql, liste);
+        // 5. Obtenir tous les modèles de listes existants
+        public async Task<List<CoreModels.ModelDeListeDeNaissance>> ObtenirTousLesModelesAsync()
+        {
+            using var connection = GetConnection();
+            var sql = "SELECT * FROM modeldelistedenaissance"; 
+            
+            var result = await connection.QueryAsync<CoreModels.ModelDeListeDeNaissance>(sql);
+            return result.AsList();
         }
     }
 }
