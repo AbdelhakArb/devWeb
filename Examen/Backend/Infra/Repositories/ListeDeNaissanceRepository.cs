@@ -67,5 +67,54 @@ namespace Infra.Repositories
             var result = await connection.QueryAsync<CoreModels.ModelDeListeDeNaissance>(sql);
             return result.AsList();
         }
+
+        // 6. Ajouter un article dans une liste de naissance
+public async Task AjouterArticleDansListeAsync(CoreModels.PresenceArticleDansListe presenceArticle)
+{
+    using var connection = GetConnection();
+    
+    // Le SQL vise la table pivot. On passe les ID et la quantité souhaitée.
+    var sql = @"INSERT INTO presencearticledansliste (listeDeNaissanceId, articleId, qtySouhaitee) 
+                VALUES (@ListeDeNaissanceId, @ArticleId, @QtySouhaitee);";
+
+    await connection.ExecuteAsync(sql, new 
+    {
+        presenceArticle.ListeDeNaissanceId,
+        presenceArticle.ArticleId,
+        presenceArticle.QtySouhaitee
+    });
+}
+public async Task<List<CoreModels.ArticleItemInListe>> GetArticlesPourReservationAsync(int listeId)
+{
+    using var connection = GetConnection();
+    
+    var sql = @"
+        SELECT 
+            p.presenceArticleDansListeId AS PresenceArticleListeId,
+            p.listeDeNaissanceId AS ListeDeNaissanceId,
+            p.qtySouhaitee AS QtySouhaitee,
+            COALESCE(SUM(r.qtyReserve), 0) AS QtyReservee,
+            (p.qtySouhaitee - COALESCE(SUM(r.qtyReserve), 0)) AS QtyRestante,
+            a.ArticleId AS Id,
+            a.ArticleNom AS Nom,
+            a.ArticlePrix AS Prix
+        FROM presencearticledansliste p
+        INNER JOIN article a ON p.articleId = a.ArticleId
+        LEFT JOIN reservation r ON p.presenceArticleDansListeId = r.presenceArticleDansListeId
+        WHERE p.listeDeNaissanceId = @ListeId
+        GROUP BY p.presenceArticleDansListeId, p.listeDeNaissanceId, p.qtySouhaitee, a.ArticleId, a.ArticleNom, a.ArticlePrix;";
+
+    var result = await connection.QueryAsync<CoreModels.ArticleItemInListe, CoreModels.ArticleDto, CoreModels.ArticleItemInListe>(
+        sql,
+        (item, art) => {
+            item.Article = art;
+            return item;
+        },
+        new { ListeId = listeId },
+        splitOn: "Id"
+    );
+
+    return result.ToList();
+}
     }
 }

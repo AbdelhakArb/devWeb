@@ -9,4 +9,6 @@ public interface IListeDeNaissanceGateway
     Task<List<Models.ListeDeNaissance>> ObtenirListesParParentIdAsync(int compteParentId);
     Task<Models.ListeDeNaissance?> ObtenirListeParCodeOuLienAsync(string code);
     Task<List<ModelDeListeDeNaissance>> ObtenirTousLesModelesAsync();
+    Task AjouterArticleDansListeAsync(PresenceArticleDansListe presenceArticle);
+    Task<List<ListeDeNaissance.Core.Models.ArticleItemInListe>> GetArticlesPourReservationAsync(int listeId);
 }
