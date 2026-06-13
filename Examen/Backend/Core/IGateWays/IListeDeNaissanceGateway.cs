@@ -11,4 +11,7 @@ public interface IListeDeNaissanceGateway
     Task<List<ModelDeListeDeNaissance>> ObtenirTousLesModelesAsync();
     Task AjouterArticleDansListeAsync(PresenceArticleDansListe presenceArticle);
     Task<List<ListeDeNaissance.Core.Models.ArticleItemInListe>> GetArticlesPourReservationAsync(int listeId);
+    Task<int> IncrementerQuantiteArticleAsync(int listeId, int articleId);
+    Task<int> DecrementerQuantiteArticleAsync(int listeId, int articleId);
+    Task<bool> SoumettreReservationsAsync(PanierReservationDto panier);
 }
