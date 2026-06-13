@@ -49,6 +49,62 @@ namespace Api.EndPoints
                 var articles = await listeGateway.GetArticlesPourReservationAsync(listeId);
                 return Results.Ok(articles);
             });
+            // Incrementer la quantité d'un article dans une liste (+ stock magasin -1)
+            app.MapPut("/api/listedenaissance/{listeId:int}/articles/{articleId:int}/increment", async (
+                int listeId,
+                int articleId,
+                IListeDeNaissanceGateway listeGateway) =>
+            {
+                try
+                {
+                    int nouvelleQty = await listeGateway.IncrementerQuantiteArticleAsync(listeId, articleId);
+                    return Results.Ok(new
+                    {
+                        message = "Quantité incrémentée avec succès !",
+                        nouvelleQtySouhaitee = nouvelleQty
+                    });
+                }
+                catch (Exception)
+                {
+                    return Results.BadRequest("Impossible d'incrémenter l'article. Vérifiez les ID ou les stocks.");
+                }
+            });
+            // Décrémenter la quantité d'un article dans une liste (+ stock magasin +1, supprime si qté = 0)
+            app.MapPut("/api/listedenaissance/{listeId:int}/articles/{articleId:int}/decrement", async (
+                int listeId,
+                int articleId,
+                IListeDeNaissanceGateway listeGateway) =>
+            {
+                try
+                {
+                    int nouvelleQty = await listeGateway.DecrementerQuantiteArticleAsync(listeId, articleId);
+
+                    return Results.Ok(new
+                    {
+                        message = nouvelleQty == 0 ? "L'article a été retiré de la liste." : "Quantité décrémentée avec succès !",
+                        nouvelleQtySouhaitee = nouvelleQty
+                    });
+                }
+                catch (Exception)
+                {
+                    return Results.BadRequest("Impossible de décrémenter l'article. Vérifiez que l'article existe bien dans la liste.");
+                }
+            });
+            // Soumettre un panier complet de réservations fait par un visiteur
+            app.MapPost("/api/listedenaissance/reserver", async (
+                CoreModels.PanierReservationDto panier,
+                IListeDeNaissanceGateway listeGateway) =>
+            {
+                try
+                {
+                    bool succes = await listeGateway.SoumettreReservationsAsync(panier);
+                    return Results.Ok(new { message = "Réservations enregistrées avec succès !" });
+                }
+                catch (Exception ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+            });
 
         }
 
