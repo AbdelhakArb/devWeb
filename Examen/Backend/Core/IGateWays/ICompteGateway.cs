@@ -8,4 +8,5 @@ public interface ICompteGateway
     Task<Visiteur?> ObtenirVisiteurParEmailAsync(string email);
     Task CreerCompteParentAsync(CompteParent parent);
     Task CreerCompteVisiteurAsync(Visiteur visiteur);
+    
 }

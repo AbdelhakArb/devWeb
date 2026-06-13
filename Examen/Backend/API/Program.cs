@@ -3,7 +3,7 @@ using ListeDeNaissance.Core.Usecases;
 using ListeDeNaissance.Core.Usecases.Abstractions;
 using Infra.Repositories;
 using Infra.Repositories.Abstractions;
-using Api.EndPoints; // <-- On ajoute ça pour lier tes nouvelles routes !
+using Api.EndPoints; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,5 +37,7 @@ app.UseHttpsRedirection();
 
 // Enregistrement de tes routes
 app.MapListeDeNaissanceRoutes();
+ListeDeNaissance.API.Endpoints.CompteRoutes.MapCompteRoutes(app);
+
 
 app.Run();
