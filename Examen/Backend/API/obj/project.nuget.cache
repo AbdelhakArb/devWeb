@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "f+C5VyoOZew=",
+  "dgSpecHash": "020EQTpyWSc=",
   "success": true,
   "projectFilePath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\API\\API.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\cash\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
     "C:\\Users\\cash\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
     "C:\\Users\\cash\\.nuget\\packages\\dapper\\2.1.79\\dapper.2.1.79.nupkg.sha512",
     "C:\\Users\\cash\\.nuget\\packages\\google.protobuf\\3.32.0\\google.protobuf.3.32.0.nupkg.sha512",

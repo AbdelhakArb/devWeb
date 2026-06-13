@@ -14,4 +14,5 @@ public interface IListeDeNaissanceGateway
     Task<int> IncrementerQuantiteArticleAsync(int listeId, int articleId);
     Task<int> DecrementerQuantiteArticleAsync(int listeId, int articleId);
     Task<bool> SoumettreReservationsAsync(PanierReservationDto panier);
+    
 }

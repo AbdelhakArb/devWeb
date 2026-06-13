@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     "net10.0": {
+      "BCrypt.Net-Next/4.2.0": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/BCrypt-Net-Next.dll": {}
+        },
+        "runtime": {
+          "lib/net10.0/BCrypt-Net-Next.dll": {}
+        }
+      },
       "BouncyCastle.Cryptography/2.6.2": {
         "type": "package",
         "compile": {
@@ -324,6 +333,31 @@
     }
   },
   "libraries": {
+    "BCrypt.Net-Next/4.2.0": {
+      "sha512": "gwLD2KfCuwQesP17aVh4h6lpiMPEVt5Lbpndo0ej903hNUUTtyxt3ARdDjmuydBRTAUICc7OVKVbaOvc6SQYXA==",
+      "type": "package",
+      "path": "bcrypt.net-next/4.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "bcrypt.net-next.4.2.0.nupkg.sha512",
+        "bcrypt.net-next.nuspec",
+        "ico.png",
+        "lib/net10.0/BCrypt-Net-Next.dll",
+        "lib/net10.0/BCrypt.Net-Next.xml",
+        "lib/net462/BCrypt-Net-Next.dll",
+        "lib/net462/BCrypt.Net-Next.xml",
+        "lib/net472/BCrypt-Net-Next.dll",
+        "lib/net472/BCrypt.Net-Next.xml",
+        "lib/net48/BCrypt-Net-Next.dll",
+        "lib/net48/BCrypt.Net-Next.xml",
+        "lib/netstandard2.0/BCrypt-Net-Next.dll",
+        "lib/netstandard2.0/BCrypt.Net-Next.xml",
+        "lib/netstandard2.1/BCrypt-Net-Next.dll",
+        "lib/netstandard2.1/BCrypt.Net-Next.xml",
+        "readme.md"
+      ]
+    },
     "BouncyCastle.Cryptography/2.6.2": {
       "sha512": "7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w==",
       "type": "package",
@@ -801,6 +835,7 @@
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "BCrypt.Net-Next >= 4.2.0",
       "Core >= 1.0.0",
       "Dapper >= 2.1.79",
       "Microsoft.Extensions.Configuration.Abstractions >= 10.0.9",
@@ -814,11 +849,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Infra\\Infra.csproj",
+      "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\INFRA\\Infra.csproj",
       "projectName": "Infra",
-      "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Infra\\Infra.csproj",
+      "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\INFRA\\Infra.csproj",
       "packagesPath": "C:\\Users\\cash\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Infra\\obj\\",
+      "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\INFRA\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\cash\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -855,6 +890,10 @@
       "net10.0": {
         "targetAlias": "net10.0",
         "dependencies": {
+          "BCrypt.Net-Next": {
+            "target": "Package",
+            "version": "[4.2.0, )"
+          },
           "Dapper": {
             "target": "Package",
             "version": "[2.1.79, )"
