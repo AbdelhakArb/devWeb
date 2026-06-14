@@ -5,43 +5,60 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.EndPoints
 {
+    // --- LES DTOS POUR FAIRE PLAISIR AU PROF ---
+    public record CreerListeDto(int CompteParentId, string NomListeDeNaissance);
+    public record AjouterArticleDto(int ListeDeNaissanceId, int ArticleId, int QtySouhaitee);
+
     public static class ListeDeNaissanceRoutes
     {
         public static void MapListeDeNaissanceRoutes(this IEndpointRouteBuilder app)
         {
+            // --- 1. CRÉER UNE LISTE (Utilise CreerListeDto) ---
             app.MapPost("/api/listedenaissance", async (
-    [FromBody] CoreModels.ListeDeNaissance nouvelleListe,
-    ICreerListeDeNaissanceUseCase creerListeUseCase) =>
-{
-    if (nouvelleListe == null)
-    {
-        return Results.BadRequest("Données invalides.");
-    }
-
-    // ASTUCE : On force une date par défaut pour contourner le blocage MySQL 
-    // (Ajoute cette ligne si ta propriété s'appelle datePrevuPourAccouchement)
-    // nouvelleListe.datePrevuPourAccouchement = DateTime.Now;
-
-    // Exécution du cas d'utilisation (Core)
-    await creerListeUseCase.ExecuterAsync(nouvelleListe);
-
-    return Results.Ok(nouvelleListe);
-});
-            app.MapPost("/api/listedenaissance/article", async (
-            CoreModels.PresenceArticleDansListe presenceArticle,
-            IListeDeNaissanceGateway listeGateway) =>
-        {
-            // Sécurité de base : on vérifie que les ID et la quantité tiennent la route
-            if (presenceArticle.ListeDeNaissanceId <= 0 || presenceArticle.ArticleId <= 0 || presenceArticle.QtySouhaitee <= 0)
+                [FromBody] CreerListeDto dto,
+                ICreerListeDeNaissanceUseCase creerListeUseCase) =>
             {
-                return Results.BadRequest("Les données fournies sont invalides (ID ou quantité incorrects).");
-            }
+                if (dto == null || string.IsNullOrWhiteSpace(dto.NomListeDeNaissance))
+                {
+                    return Results.BadRequest("Données de liste invalides.");
+                }
 
-            await listeGateway.AjouterArticleDansListeAsync(presenceArticle);
+                // On convertit le DTO vers le modèle attendu par le UseCase
+                var nouvelleListe = new CoreModels.ListeDeNaissance
+                {
+                    CompteParentId = dto.CompteParentId,
+                    NomListeDeNaissance = dto.NomListeDeNaissance
+                };
 
-            return Results.Ok(new { message = "L'article a bien été ajouté à la liste de naissance !" });
-        });
-            // Recréation de la route de réservation version C#
+                await creerListeUseCase.ExecuterAsync(nouvelleListe);
+
+                return Results.Ok(nouvelleListe);
+            });
+
+            // --- 2. AJOUTER UN ARTICLE DANS UNE LISTE (Utilise AjouterArticleDto) ---
+            app.MapPost("/api/listedenaissance/article", async (
+                [FromBody] AjouterArticleDto dto,
+                IListeDeNaissanceGateway listeGateway) =>
+            {
+                if (dto == null || dto.ListeDeNaissanceId <= 0 || dto.ArticleId <= 0 || dto.QtySouhaitee <= 0)
+                {
+                    return Results.BadRequest("Les données fournies sont invalides (ID ou quantité incorrects).");
+                }
+
+                // On mappe vers l'objet métier PresenceArticleDansListe
+                var presenceArticle = new CoreModels.PresenceArticleDansListe
+                {
+                    ListeDeNaissanceId = dto.ListeDeNaissanceId,
+                    ArticleId = dto.ArticleId,
+                    QtySouhaitee = dto.QtySouhaitee
+                };
+
+                await listeGateway.AjouterArticleDansListeAsync(presenceArticle);
+
+                return Results.Ok(new { message = "L'article a bien été ajouté à la liste de naissance !" });
+            });
+
+            // --- 3. RÉCUPÉRER LES ARTICLES POUR RÉSERVATION ---
             app.MapGet("/api/listedenaissance/{listeId:int}/articles", async (
                 int listeId,
                 IListeDeNaissanceGateway listeGateway) =>
@@ -49,7 +66,8 @@ namespace Api.EndPoints
                 var articles = await listeGateway.GetArticlesPourReservationAsync(listeId);
                 return Results.Ok(articles);
             });
-            // Incrementer la quantité d'un article dans une liste (+ stock magasin -1)
+
+            // --- 4. INCREMENTER QUANTITÉ ---
             app.MapPut("/api/listedenaissance/{listeId:int}/articles/{articleId:int}/increment", async (
                 int listeId,
                 int articleId,
@@ -69,7 +87,8 @@ namespace Api.EndPoints
                     return Results.BadRequest("Impossible d'incrémenter l'article. Vérifiez les ID ou les stocks.");
                 }
             });
-            // Décrémenter la quantité d'un article dans une liste (+ stock magasin +1, supprime si qté = 0)
+
+            // --- 5. DÉCRÉMENTER QUANTITÉ ---
             app.MapPut("/api/listedenaissance/{listeId:int}/articles/{articleId:int}/decrement", async (
                 int listeId,
                 int articleId,
@@ -90,9 +109,10 @@ namespace Api.EndPoints
                     return Results.BadRequest("Impossible de décrémenter l'article. Vérifiez que l'article existe bien dans la liste.");
                 }
             });
-            // Soumettre un panier complet de réservations fait par un visiteur
+
+            // --- 6. SOUMETTRE LE PANIER DE RÉSERVATION VISITEUR ---
             app.MapPost("/api/listedenaissance/reserver", async (
-                CoreModels.PanierReservationDto panier,
+                [FromBody] CoreModels.PanierReservationDto panier,
                 IListeDeNaissanceGateway listeGateway) =>
             {
                 try
@@ -105,8 +125,6 @@ namespace Api.EndPoints
                     return Results.BadRequest(new { error = ex.Message });
                 }
             });
-
         }
-
     }
 }
