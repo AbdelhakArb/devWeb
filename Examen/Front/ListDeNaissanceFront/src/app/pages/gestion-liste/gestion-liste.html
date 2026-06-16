@@ -1,0 +1,50 @@
+<div style="max-width: 1000px; margin: 30px auto; padding: 20px; font-family: 'Segoe UI', sans-serif;">
+  <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Gestion de ma Liste de Naissance</h2>
+
+  <div style="display: flex; gap: 30px;">
+    
+    <div style="flex: 1; background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+      <h3 style="color: #4a5568; margin-top: 0;">📦 Articles disponibles</h3>
+      <p style="font-size: 14px; color: #718096;">Cliquez pour ajouter (ou augmenter la quantité).</p>
+      
+      <div *ngFor="let art of catalogueArticles" style="background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #007bff;">
+        <div>
+          <strong style="display: block; color: #2d3748;">{{ art.nom }}</strong>
+          <span style="font-size: 13px; color: #a0aec0; background: #edf2f7; padding: 2px 6px; border-radius: 4px;">{{ art.categorie }}</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <span style="font-weight: bold; color: #2b6cb0;">{{ art.prix | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
+          <button (click)="ajouterArticle(art)" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Ajouter</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex: 1; background: #fff; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0;">
+      <h3 style="color: #2d3748; margin-top: 0;">👶 Ma Liste Finale ({{ totalQuantite }} articles demandés)</h3>
+
+      <div *ngIf="maListeArticles.length === 0" style="text-align: center; color: #a0aec0; padding: 40px 0;">
+        <span style="font-size: 40px;">🛒</span>
+        <p>Votre liste est vide. Ajoutez des articles depuis le catalogue !</p>
+      </div>
+
+      <div *ngFor="let item of maListeArticles" style="background: #fff5f5; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #fed7d7; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="font-weight: 600; color: #c53030;">{{ item.nom }}</span>
+          <span style="margin-left: 10px; background: #c53030; color: white; padding: 2px 8px; border-radius: 20px; font-size: 12px; font-weight: bold;">
+            Qté: {{ item.articleQty }}
+          </span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <span style="font-weight: bold; color: #4a5568;">{{ (item.prix * (item.articleQty || 1)) | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
+          <button (click)="retirerArticle(item.id)" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">- Retirer</button>
+        </div>
+      </div>
+
+      <div *ngIf="maListeArticles.length > 0" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 18px; font-weight: bold; color: #4a5568;">Total de la liste :</span>
+        <span style="font-size: 22px; font-weight: 800; color: #22c55e;">{{ totalPrix | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>

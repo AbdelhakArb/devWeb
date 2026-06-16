@@ -1,12 +1,14 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { CreerListe } from './pages/creer-liste/creer-liste'; // On importe ta page
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, CreerListe], // On ajoute CreerListe ici
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-  protected readonly title = signal('ListDeNaissanceFront');
+export class AppComponent {
+  title = 'mon-site-naissance';
 }

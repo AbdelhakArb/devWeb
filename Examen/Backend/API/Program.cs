@@ -8,7 +8,18 @@ using Api.EndPoints;
 var builder = WebApplication.CreateBuilder(args);
 
 // =========================================================================
-// 1. INJECTION DES DÉPENDANCES
+// 1. CONFIGURATION DES CORS (Pour autoriser Angular)
+// =========================================================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular",
+        policy => policy.WithOrigins("http://localhost:4200") // L'URL par défaut d'Angular
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+});
+
+// =========================================================================
+// 2. INJECTION DES DÉPENDANCES
 // =========================================================================
 
 // ---- Les Gateways / Repositories ----
@@ -25,8 +36,11 @@ builder.Services.AddOpenApi();
 var app = builder.Build();
 
 // =========================================================================
-// 2. CONFIGURATION DU PIPELINE HTTP
+// 3. CONFIGURATION DU PIPELINE HTTP
 // =========================================================================
+
+// Activation obligatoire des CORS dans le pipeline (juste avant les routes)
+app.UseCors("AllowAngular");
 
 if (app.Environment.IsDevelopment())
 {
@@ -38,6 +52,5 @@ app.UseHttpsRedirection();
 // Enregistrement de tes routes
 app.MapListeDeNaissanceRoutes();
 ListeDeNaissance.API.Endpoints.CompteRoutes.MapCompteRoutes(app);
-
 
 app.Run();

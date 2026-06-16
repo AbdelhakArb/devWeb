@@ -1,0 +1,40 @@
+<div style="max-width: 450px; margin: 40px auto; padding: 25px; border: 1px solid #e0e0e0; border-radius: 12px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+  <h2 style="color: #333; margin-bottom: 20px; text-align: center;">Créer ma Liste de Naissance</h2>
+  
+  <form (ngSubmit)="onSubmit()">
+    <!-- Champ Nom -->
+    <div style="margin-bottom: 15px;">
+      <label for="nom" style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Nom de la liste *</label>
+      <input type="text" id="nom" name="nom" [(ngModel)]="nomListe" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;" placeholder="Ex: Bienvenue à notre petit ange">
+    </div>
+
+    <!-- Champ Date d'accouchement -->
+    <div style="margin-bottom: 15px;">
+      <label for="dateAccouchement" style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Date prévue d'accouchement</label>
+      <input type="date" id="dateAccouchement" name="dateAccouchement" [(ngModel)]="dateAccouchement" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;">
+    </div>
+
+    <!-- Champ Lieu -->
+    <div style="margin-bottom: 20px;">
+      <label for="lieu" style="display: block; margin-bottom: 5px; font-weight: 600; color: #555;">Lieu de l'événement / Maternité</label>
+      <input type="text" id="lieu" name="lieu" [(ngModel)]="lieu" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;" placeholder="Ex: Hôpital de Paris, Chez nous...">
+    </div>
+
+    <!-- Bouton Soumettre -->
+    <button type="submit" 
+        [disabled]="isSubmitting" 
+        style="width: 100%; padding: 12px; background-color: #28a745; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s;"
+        [style.opacity]="isSubmitting ? '0.6' : '1'"
+        [style.cursor]="isSubmitting ? 'not-allowed' : 'pointer'">
+  {{ isSubmitting ? 'Création en cours...' : 'Créer la liste officielle' }}
+</button>
+  </form>
+
+  <!-- Messages de feedback -->
+  <div *ngIf="messageSucces" style="color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; font-weight: 500;">
+    {{ messageSucces }}
+  </div>
+  <div *ngIf="messageErreur" style="color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 12px; margin-top: 15px; border-radius: 6px; text-align: center; font-weight: 500;">
+    {{ messageErreur }}
+  </div>
+</div>
