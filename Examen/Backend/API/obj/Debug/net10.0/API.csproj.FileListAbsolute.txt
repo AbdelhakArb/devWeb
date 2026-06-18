@@ -55,3 +55,12 @@ C:\Users\cash\Desktop\Dev\devWeb\Examen\Backend\API\obj\Debug\net10.0\API.pdb
 C:\Users\cash\Desktop\Dev\devWeb\Examen\Backend\API\obj\Debug\net10.0\API.genruntimeconfig.cache
 C:\Users\cash\Desktop\Dev\devWeb\Examen\Backend\API\obj\Debug\net10.0\ref\API.dll
 C:\Users\cash\Desktop\Dev\devWeb\Examen\Backend\API\bin\Debug\net10.0\BCrypt-Net-Next.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\Microsoft.Bcl.Cryptography.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\cash\Desktop\Dev\devWeb\examen\backend\api\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll

@@ -1,32 +1,37 @@
+using System;
+using System.Threading.Tasks;
 using ListeDeNaissance.Core.IGateways;
+using ListeDeNaissance.Core.Models;
 using ListeDeNaissance.Core.Usecases.Abstractions;
 
-namespace ListeDeNaissance.Core.Usecases;
-
-public class CreerListeDeNaissanceUseCase : ICreerListeDeNaissanceUseCase
+namespace ListeDeNaissance.Core.UseCases
 {
-    private readonly IListeDeNaissanceGateway _listeGateway;
-
-    public CreerListeDeNaissanceUseCase(IListeDeNaissanceGateway listeGateway)
+    public class CreerListeDeNaissanceUseCase : ICreerListeDeNaissanceUseCase
     {
-        _listeGateway = listeGateway;
-    }
+        private readonly IListeDeNaissanceGateway _listeDeNaissanceGateway;
 
-    public async Task<Models.ListeDeNaissance> ExecuterAsync(Models.ListeDeNaissance nouvelleListe)
-    {
-        var listesDuParent = await _listeGateway.ObtenirListesParParentIdAsync(nouvelleListe.CompteParentId);
-        
-        bool nomExisteDeja = listesDuParent.Any(l => l.NomListeDeNaissance.Equals(nouvelleListe.NomListeDeNaissance, StringComparison.OrdinalIgnoreCase));
-        
-        if (nomExisteDeja)
+        public CreerListeDeNaissanceUseCase(IListeDeNaissanceGateway listeDeNaissanceGateway)
         {
-            throw new InvalidOperationException("Vous avez déjà créé une liste de naissance avec ce nom.");
+            _listeDeNaissanceGateway = listeDeNaissanceGateway;
         }
 
-        nouvelleListe.DateCreationListe = DateTime.UtcNow;
-        nouvelleListe.StatusListe = "Active";
+        public async Task<Models.ListeDeNaissance> ExecuterAsync(Models.ListeDeNaissance nouvelleListe)
+        {
+            if (nouvelleListe == null)
+            {
+                throw new ArgumentNullException(nameof(nouvelleListe), "La liste ne peut pas être nulle.");
+            }
 
-        await _listeGateway.CreerListeAsync(nouvelleListe);
-        return nouvelleListe;
+            if (string.IsNullOrWhiteSpace(nouvelleListe.NomListeDeNaissance))
+            {
+                throw new ArgumentException("Le nom de la liste de naissance est obligatoire.");
+            }
+
+            // On enregistre la liste via la Gateway
+            await _listeDeNaissanceGateway.EnregistrerListeAsync(nouvelleListe);
+
+            // On retourne la liste créée pour satisfaire l'interface (Task<ListeDeNaissance>)
+            return nouvelleListe;
+        }
     }
 }
