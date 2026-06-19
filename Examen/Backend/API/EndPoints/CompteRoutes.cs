@@ -1,116 +1,102 @@
-using Infra.Repositories.Abstractions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using ListeDeNaissance.Core.UseCases;
 using ListeDeNaissance.Core.Models;
-using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
-namespace ListeDeNaissance.API.Endpoints;
-
-public static class CompteRoutes
+namespace ListeDeNaissance.API.Endpoints
 {
-    public static void MapCompteRoutes(this IEndpointRouteBuilder app)
+    public static class CompteRoutes
     {
-        // =========================================================================
-        // 1. LES INSCRIPTIONS (Toujours séparées car le choix du rôle est explicite)
-        // =========================================================================
-
-        // --- INSCRIPTION PARENT ---
-        app.MapPost("/api/auth/parent/register", ([FromBody] CompteParent nouveauParent, ICompteRepository compteRepo) =>
+        public static void MapCompteRoutes(this IEndpointRouteBuilder routes)
         {
-            try
+            // =========================================================================
+            // 1. ROUTE D'INSCRIPTION DU PARENT
+            // =========================================================================
+            routes.MapPost("/api/comptes/inscription-parent", async (CompteParent nouveauParent, IAuthentificationUseCase authUseCase) =>
             {
-                var compteExistant = compteRepo.GetCompteByEmail(nouveauParent.EmailDeContact);
-                if (compteExistant != null)
+                try
                 {
-                    return Results.BadRequest(new { error = "Cet email est déjà utilisé par un parent." });
+                    // On passe l'objet directement au UseCase qui gère la logique métier
+                    await authUseCase.InscrireParentAsync(nouveauParent);
+                    
+                    return Results.Json(new { message = "Compte parent créé avec succès !" }, statusCode: 201);
                 }
-
-                compteRepo.CreateCompte(nouveauParent);
-                return Results.Ok(new { message = "Compte parent créé avec succès !" });
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-        });
-
-        // --- INSCRIPTION VISITEUR ---
-        app.MapPost("/api/auth/visiteur/register", ([FromBody] Visiteur nouveauVisiteur, ICompteRepository compteRepo) =>
-        {
-            try
-            {
-                var existant = compteRepo.GetVisiteurByEmail(nouveauVisiteur.VisiteurEmail);
-                if (existant != null)
+                catch (InvalidOperationException ex)
                 {
-                    return Results.BadRequest(new { error = "Cet email est déjà utilisé par un visiteur." });
+                    return Results.BadRequest(new { error = ex.Message });
                 }
-
-                compteRepo.CreateVisiteur(nouveauVisiteur);
-                return Results.Ok(new { message = "Compte visiteur créé avec succès !" });
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(new { error = ex.Message });
-            }
-        });
-
-
-        // =========================================================================
-        // 2. LA CONNEXION UNIQUE (OPTION B - RECHERCHE INTELLIGENTE)
-        // =========================================================================
-        
-        app.MapPost("/api/auth/login", ([FromBody] LoginRequestDto loginRequest, ICompteRepository compteRepo) =>
-        {
-            // --- TENTATIVE 1 : On cherche dans les PARENTS ---
-            var compteParent = compteRepo.GetCompteByEmail(loginRequest.Email);
-            
-            if (compteParent != null)
-            {
-                // On vérifie le mot de passe du parent
-                bool mdpParentCorrect = BCrypt.Net.BCrypt.Verify(loginRequest.Password, compteParent.MotDePasseCompte);
-
-                if (mdpParentCorrect)
+                catch (Exception)
                 {
-                    return Results.Ok(new
-                    {
-                        id = compteParent.CompteParentId,
-                        email = compteParent.EmailDeContact,
-                        nom = compteParent.NomPremierParent,
-                        prenom = compteParent.PrenomPremierParent,
-                        role = "parent", // Le Front-end sait instantanément que c'est un parent !
-                        message = "Connexion réussie en tant que Parent !"
-                    });
+                    return Results.StatusCode(500);
                 }
-                
-                // Si l'email existe chez les parents mais que le MDP est faux, on s'arrête ici
-                return Results.Json(new { error = "Identifiants invalides." }, statusCode: 401);
-            }
+            });
 
-            // --- TENTATIVE 2 : Si ce n'est pas un parent, on cherche dans les VISITEURS ---
-            var visiteur = compteRepo.GetVisiteurByEmail(loginRequest.Email);
-            
-            if (visiteur != null)
+            // =========================================================================
+            // 2. ROUTE D'INSCRIPTION DU VISITEUR
+            // =========================================================================
+            routes.MapPost("/api/comptes/inscription-visiteur", async (Visiteur nouveauVisiteur, IAuthentificationUseCase authUseCase) =>
             {
-                // On vérifie le mot de passe du visiteur
-                bool mdpVisiteurCorrect = BCrypt.Net.BCrypt.Verify(loginRequest.Password, visiteur.VisiteurMdp);
-
-                if (mdpVisiteurCorrect)
+                try
                 {
-                    return Results.Ok(new
-                    {
-                        id = visiteur.VisiteurId,
-                        email = visiteur.VisiteurEmail,
-                        nom = visiteur.VisiteurNom,
-                        prenom = visiteur.VisiteurPrenom,
-                        role = "visiteur", // Le Front-end sait instantanément que c'est un visiteur !
-                        message = "Connexion réussie en tant que Visiteur !"
-                    });
+                    await authUseCase.InscrireVisiteurAsync(nouveauVisiteur);
+                    return Results.Json(new { message = "Compte visiteur créé avec succès !" }, statusCode: 201);
                 }
+                catch (InvalidOperationException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+                catch (Exception)
+                {
+                    return Results.StatusCode(500);
+                }
+            });
 
-                // Si l'email existe chez les visiteurs mais que le MDP est faux
-                return Results.Json(new { error = "Identifiants invalides." }, statusCode: 401);
-            }
+            // =========================================================================
+            // 3. ROUTE DE CONNEXION DU PARENT
+            // =========================================================================
+            routes.MapPost("/api/comptes/connexion-parent", async (LoginRequest loginData, IAuthentificationUseCase authUseCase) =>
+            {
+                try
+                {
+                    // L'API extrait l'email et le mot de passe pour les donner au UseCase
+                    var parent = await authUseCase.ConnexionParentAsync(loginData.Email, loginData.MotDePasse);
+                    
+                    return Results.Ok(new { message = "Connexion réussie !", utilisateur = parent });
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Results.Json(new { error = ex.Message }, statusCode: 401);
+                }
+                catch (Exception)
+                {
+                    return Results.StatusCode(500);
+                }
+            });
 
-            // --- TENTATIVE 3 : L'email n'existe nulle part ---
-            return Results.Json(new { error = "Identifiants invalides." }, statusCode: 401);
-        });
+            // =========================================================================
+            // 4. ROUTE DE CONNEXION DU VISITEUR
+            // =========================================================================
+            routes.MapPost("/api/comptes/connexion-visiteur", async (LoginRequest loginData, IAuthentificationUseCase authUseCase) =>
+            {
+                try
+                {
+                    var visiteur = await authUseCase.ConnexionVisiteurAsync(loginData.Email, loginData.MotDePasse);
+                    return Results.Ok(new { message = "Connexion réussie !", utilisateur = visiteur });
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    return Results.Json(new { error = ex.Message }, statusCode: 401);
+                }
+                catch (Exception)
+                {
+                    return Results.StatusCode(500);
+                }
+            });
+        }
     }
+
+    public record LoginRequest(string Email, string MotDePasse);
 }
