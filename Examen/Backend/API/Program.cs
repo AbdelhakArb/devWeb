@@ -12,46 +12,47 @@ using ListeDeNaissance.API.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =========================================================================
-// CONFIGURATION DES SERVICES
-// =========================================================================
+// -----------------------------------------------------------------
+// 1. CONFIGURATION DES SERVICES (AVANT builder.Build())
+// -----------------------------------------------------------------
 
-// Enregistrement de TES services (Injections de ton application)
-builder.Services.AddMyInfrastructureServices();
-builder.Services.AddMonAppliCoreServices();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
-#region Cors
-
+// Configuration de la politique CORS pour autoriser Angular
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost",
-        policy =>
-        {
-            policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // Ton port Angular
+              .AllowAnyHeader()                     // Autorise le Content-Type, les tokens, etc.
+              .AllowAnyMethod()                     // Autorise POST, GET, PUT, DELETE
+              .AllowCredentials();                  // Optionnel : Autorise les cookies/sessions si besoin
+    });
 });
 
-#endregion
+// Exemple de configuration de ta base de données (à adapter avec ton vrai DbContext)
+// builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
-// Notre filet de sécurité global pour attraper les crashs proprement
-app.UseMiddleware<GlobalExceptionHandlerMiddleware>(); 
+// -----------------------------------------------------------------
+// 2. CONFIGURATION DU PIPELINE HTTP (APRÈS builder.Build())
+// -----------------------------------------------------------------
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseCors("AllowLocalhost");
-}
 
-app.UseHttpsRedirection();
+// /!\ L'ORDRE ICI EST CRUCIAL POUR EVITER LES ERREURS /!\
 
-#region Endpoints (TES ROUTES)
+app.UseRouting();
 
-app.MapCompteRoutes();          
-app.MapListeDeNaissanceRoutes();    
+// Activation globale du CORS (Placé obligatoirement AVANT l'authentification/autorisation)
+app.UseCors("AllowAngularApp");
 
-#endregion
+app.UseHttpsRedirection(); // Si tu utilises aussi du HTTPS en parallèle
+
+app.UseAuthorization();
+
+app.MapControllers();
 
 app.Run();

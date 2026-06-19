@@ -1,0 +1,107 @@
+.home-container {
+  max-width: 1000px;
+  margin: 60px auto;
+  padding: 0 20px;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  text-align: center;
+}
+
+.home-header {
+  margin-bottom: 50px;
+}
+
+.home-header h1 {
+  font-size: 2.8rem;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.home-subtitle {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+}
+
+.cards-grid {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  margin-bottom: 60px;
+}
+
+.home-card {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.home-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card-icon {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+}
+
+.home-card h2 {
+  color: #2c3e50;
+  font-size: 1.8rem;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.home-card p {
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.btn-home {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-parents {
+  background-color: #3498db;
+  color: white;
+}
+
+.btn-parents:hover {
+  background-color: #2980b9;
+}
+
+.btn-visiteurs {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.btn-visiteurs:hover {
+  background-color: #27ae60;
+}
+
+.home-footer {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Version responsive si l'écran est petit */
+@media (max-width: 768px) {
+  .cards-grid {
+    flex-direction: column;
+  }
+}
