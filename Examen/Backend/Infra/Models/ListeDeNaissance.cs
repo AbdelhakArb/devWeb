@@ -9,6 +9,6 @@ namespace Infra.Models
         public DateTime DateCreationListe { get; set; }
         public string StatusListe { get; set; } = string.Empty;
         public int CompteParentId { get; set; }
-        public string? CodeUniqueListe { get; set; } // Le point d'interrogation veut dire qu'il peut être NULL
-    }
+        public string? CodeUniqueListe { get; set; } 
+}
 }

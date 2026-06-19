@@ -1,25 +1,28 @@
+using System.Threading.Tasks;
+using ListeDeNaissance.Core.Models;
+
 namespace Infra.Repositories.Abstractions
 {
     public interface ICompteRepository
     {
         // =========================================================================
-        // 1. MÉTHODES POUR LES COMPTES PARENTS
+        // 1. MÉTHODES POUR LES COMPTES PARENTS (ASYNCHRONES)
         // =========================================================================
         
         // Récupère un parent par son adresse email (Retourne null si aucun trouvé)
-        global::ListeDeNaissance.Core.Models.CompteParent? GetCompteByEmail(string email);
+        Task<CompteParent?> GetCompteByEmailAsync(string email);
         
         // Crée un nouveau compte parent en base de données
-        void CreateCompte(global::ListeDeNaissance.Core.Models.CompteParent parent);
+        Task CreateCompteAsync(CompteParent parent);
 
         // =========================================================================
-        // 2. MÉTHODES POUR LES VISITEURS
+        // 2. MÉTHODES POUR LES VISITEURS (ASYNCHRONES)
         // =========================================================================
         
         // Récupère un visiteur par son adresse email (Retourne null si aucun trouvé)
-        global::ListeDeNaissance.Core.Models.Visiteur? GetVisiteurByEmail(string email);
+        Task<Visiteur?> GetVisiteurByEmailAsync(string email);
         
         // Crée un nouveau compte visiteur en base de données
-        void CreateVisiteur(global::ListeDeNaissance.Core.Models.Visiteur visiteur);
+        Task CreateVisiteurAsync(Visiteur visiteur);
     }
 }

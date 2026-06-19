@@ -1,56 +1,57 @@
-using ListeDeNaissance.Core.IGateways;
-using ListeDeNaissance.Core.Usecases;
-using ListeDeNaissance.Core.Usecases.Abstractions;
-using Infra.Repositories;
-using Infra.Repositories.Abstractions;
-using Api.EndPoints; 
+using Api.Middleware;
+using Api.EndPoints;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+
+// Importation de tes propres extensions de services et endpoints
+using Infra; 
+using ListeDeNaissance.Core;
+using ListeDeNaissance.API.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // =========================================================================
-// 1. CONFIGURATION DES CORS (Pour autoriser Angular)
+// CONFIGURATION DES SERVICES
 // =========================================================================
+
+// Enregistrement de TES services (Injections de ton application)
+builder.Services.AddMyInfrastructureServices();
+builder.Services.AddMonAppliCoreServices();
+
+#region Cors
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular",
-        policy => policy.WithOrigins("http://localhost:4200") // L'URL par défaut d'Angular
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+    options.AddPolicy("AllowLocalhost",
+        policy =>
+        {
+            policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
 
-// =========================================================================
-// 2. INJECTION DES DÉPENDANCES
-// =========================================================================
-
-// ---- Les Gateways / Repositories ----
-builder.Services.AddScoped<IListeDeNaissanceGateway, ListeDeNaissanceRepository>();
-builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
-builder.Services.AddScoped<ICompteRepository, CompteRepository>();
-
-// ---- Les UseCases ----
-builder.Services.AddScoped<ICreerListeDeNaissanceUseCase, CreerListeDeNaissanceUseCase>();
-
-// Configuration OpenAPI (Swagger)
-builder.Services.AddOpenApi();
+#endregion
 
 var app = builder.Build();
 
-// =========================================================================
-// 3. CONFIGURATION DU PIPELINE HTTP
-// =========================================================================
-
-// Activation obligatoire des CORS dans le pipeline (juste avant les routes)
-app.UseCors("AllowAngular");
+// Notre filet de sécurité global pour attraper les crashs proprement
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>(); 
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseCors("AllowLocalhost");
 }
 
 app.UseHttpsRedirection();
 
-// Enregistrement de tes routes
-app.MapListeDeNaissanceRoutes();
-ListeDeNaissance.API.Endpoints.CompteRoutes.MapCompteRoutes(app);
+#region Endpoints (TES ROUTES)
+
+app.MapCompteRoutes();          
+app.MapListeDeNaissanceRoutes();    
+
+#endregion
 
 app.Run();

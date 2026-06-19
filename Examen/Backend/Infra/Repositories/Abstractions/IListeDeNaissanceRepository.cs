@@ -1,8 +1,15 @@
-namespace Infra.Repositories.Abstractions;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-public interface IListeDeNaissanceRepository
+namespace Infra.Repositories.Abstractions
 {
-    Task CreerListeAsync(global::ListeDeNaissance.Core.Models.ListeDeNaissance liste);
-    Task<global::ListeDeNaissance.Core.Models.ListeDeNaissance?> ObtenirListeParIdAsync(int listeId);
-    Task<List<global::ListeDeNaissance.Core.Models.ListeDeNaissance>> ObtenirListesParParentIdAsync(int compteParentId);
+    public interface IListeDeNaissanceRepository
+    {
+        Task<IEnumerable<Models.ListeDeNaissance>> GetAllAsync();
+        Task<Models.ListeDeNaissance?> GetByIdAsync(int id);
+        Task<IEnumerable<Models.ListeDeNaissance>> GetByParentIdAsync(int parentId);
+        Task InsertAsync(Models.ListeDeNaissance liste);
+        Task UpdateAsync(Models.ListeDeNaissance liste);
+        Task DeleteAsync(int id);
+    }
 }
