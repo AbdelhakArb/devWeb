@@ -1,42 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core'; 
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // Pour la redirection
+import { Router } from '@angular/router';
 import { ListeNaissanceService } from '../../services/api/liste-naissance';
 import { ListeDeNaissance } from '../../services/api/models/liste-naissance';
+import { AuthService } from '../../services/auth'; 
 
 @Component({
   selector: 'app-creer-liste',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './creer-liste.html',
   styleUrl: './creer-liste.css',
 })
-export class CreerListe implements OnInit {
+export class CreerListe { 
   nomListe: string = '';
   dateAccouchement: string = '';
   lieu: string = '';
 
   messageSucces: string = '';
   messageErreur: string = '';
-  
-  // 1. Variable pour désactiver le bouton pendant le chargement
   isSubmitting: boolean = false; 
-
-  // Simulation d'un état de connexion (à remplacer plus tard par ton service d'authentification)
-  estConnecte: boolean = true; 
 
   constructor(
     private listeService: ListeNaissanceService,
-    private router: Router // Injection du routeur
+    private authService: AuthService,
+    private router: Router
   ) {}
-
-  ngOnInit() {
-    // 3. Sécurité : Si l'utilisateur n'est pas connecté, on le jette (vers la page login par exemple)
-    if (!this.estConnecte) {
-      alert("Accès refusé ! Vous devez être connecté pour créer une liste.");
-      this.router.navigate(['/login-page']); // Redirection vers ta page login existante
-    }
-  }
 
   onSubmit() {
     if (!this.nomListe.trim()) {
@@ -44,12 +34,13 @@ export class CreerListe implements OnInit {
       return;
     }
 
-    // Désactive le bouton dès le clic
     this.isSubmitting = true;
     this.messageErreur = '';
 
+    const parentIdConnecte = this.authService.utilisateurConnecte()?.id;
+
     const nouvelleListe: ListeDeNaissance = {
-      compteParentId: 1, 
+      compteParentId: parentIdConnecte || 1,
       nomListeDeNaissance: this.nomListe,
       datePrevuPourAccouchement: this.dateAccouchement ? new Date(this.dateAccouchement) : undefined,
       lieuListe: this.lieu.trim() || undefined,
@@ -57,18 +48,15 @@ export class CreerListe implements OnInit {
     };
 
     this.listeService.creerListe(nouvelleListe).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.messageSucces = "Liste créée ! Redirection vers la gestion de votre liste...";
-        
-        // 2. Attendre 2 petites secondes pour laisser l'utilisateur voir le succès, puis rediriger
         setTimeout(() => {
           this.router.navigate(['/gestion-liste']);
         }, 2000);
       },
-      error: (err) => {
-        this.messageErreur = err.error?.message || "Une erreur est survenue.";
-        this.messageSucces = '';
-        this.isSubmitting = false; // Réactive le bouton en cas d'échec pour qu'il puisse réessayer
+      error: (err: any) => {
+        this.messageErreur = err.error?.message || "Une erreur est survenue lors de la création.";
+        this.isSubmitting = false;
       }
     });
   }

@@ -899,11 +899,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Infra\\Infra.csproj",
+      "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\Infra.csproj",
       "projectName": "Infra",
-      "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Infra\\Infra.csproj",
+      "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\Infra.csproj",
       "packagesPath": "C:\\Users\\cash\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Infra\\obj\\",
+      "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\cash\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -918,8 +918,8 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Core\\Core.csproj": {
-              "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Core\\Core.csproj"
+            "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj": {
+              "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj"
             }
           }
         }

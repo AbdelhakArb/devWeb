@@ -1,50 +1,95 @@
-<div style="max-width: 1000px; margin: 30px auto; padding: 20px; font-family: 'Segoe UI', sans-serif;">
-  <h2 style="text-align: center; color: #333; margin-bottom: 30px;">Gestion de ma Liste de Naissance</h2>
-
-  <div style="display: flex; gap: 30px;">
+<div class="gestion-container">
+  
+  <div class="section-liste">
+    <h2>Ma Liste de Naissance</h2>
     
-    <div style="flex: 1; background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-      <h3 style="color: #4a5568; margin-top: 0;">📦 Articles disponibles</h3>
-      <p style="font-size: 14px; color: #718096;">Cliquez pour ajouter (ou augmenter la quantité).</p>
-      
-      <div *ngFor="let art of catalogueArticles" style="background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #007bff;">
-        <div>
-          <strong style="display: block; color: #2d3748;">{{ art.nom }}</strong>
-          <span style="font-size: 13px; color: #a0aec0; background: #edf2f7; padding: 2px 6px; border-radius: 4px;">{{ art.categorie }}</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 15px;">
-          <span style="font-weight: bold; color: #2b6cb0;">{{ art.prix | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
-          <button (click)="ajouterArticle(art)" style="background: #007bff; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600;">Ajouter</button>
+    <p class="info-statut">
+      Statut : 
+      @if (listeCloturee) {
+        <span class="badge cloturee">Clôturée</span>
+      } @else {
+        <span class="badge active">Active</span>
+      }
+    </p>
+
+    @if (afficherMessageConfirmation) {
+      <div class="alert confirmation-box">
+        <h3>🎉 Liste clôturée avec succès !</h3>
+        <p>Voici le récapitulatif de votre liste :</p>
+        <ul>
+          <li>Nombre total d'articles définis : <strong>{{ totalQuantite }}</strong></li>
+          <li>Valeur totale de la liste : <strong>{{ totalPrix | number:'1.2-2' }} €</strong></li>
+        </ul>
+        <p>Il vous reste des articles non pourvus. Souhaitez-vous acheter le reste vous-même ?</p>
+        <div class="actions-confirmation">
+          <button class="btn-payer-maintenant" (click)="acheterLeReste()">Payer maintenant ({{ resteAPayer | number:'1.2-2' }} €)</button>
         </div>
       </div>
+    }
+
+    <div class="liste-articles-parent">
+      @for (item of maListeArticles; track item.id) {
+        <div class="card-article">
+          <div class="article-details">
+            <h3>{{ item.nom }}</h3>
+            <p class="categorie">{{ item.categorie }}</p>
+            <p class="prix">{{ item.prix }} €</p>
+          </div>
+          
+          @if (!listeCloturee) {
+            <div class="article-actions">
+              <button class="btn-qty" (click)="retirerArticle(item.id)">-</button>
+              <span class="qty-display">Quantité : <strong>{{ item.articleQty }}</strong></span>
+              <button class="btn-qty" (click)="ajouterArticle(item)">+</button>
+            </div>
+          } @else {
+            <div class="article-actions">
+              <span class="qty-display">Quantité finale : <strong>{{ item.articleQty }}</strong></span>
+            </div>
+          }
+        </div>
+      } @empty {
+        <div class="empty-msg">
+          <p>Votre liste est vide. Ajoutez des articles depuis le catalogue à droite !</p>
+        </div>
+      }
     </div>
 
-    <div style="flex: 1; background: #fff; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e0;">
-      <h3 style="color: #2d3748; margin-top: 0;">👶 Ma Liste Finale ({{ totalQuantite }} articles demandés)</h3>
-
-      <div *ngIf="maListeArticles.length === 0" style="text-align: center; color: #a0aec0; padding: 40px 0;">
-        <span style="font-size: 40px;">🛒</span>
-        <p>Votre liste est vide. Ajoutez des articles depuis le catalogue !</p>
+    @if (maListeArticles.length > 0) {
+      <div class="totaux-box">
+        <p>Total articles sélectionnés : <strong>{{ totalQuantite }}</strong></p>
+        <p>Estimation du budget total : <strong class="prix-total">{{ totalPrix | number:'1.2-2' }} €</strong></p>
+        
+        @if (!listeCloturee) {
+          <button class="btn-cloturer" (click)="cloturerLaListe()">Clôturer la liste et voir le récapitulatif</button>
+        }
       </div>
-
-      <div *ngFor="let item of maListeArticles" style="background: #fff5f5; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #fed7d7; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <span style="font-weight: 600; color: #c53030;">{{ item.nom }}</span>
-          <span style="margin-left: 10px; background: #c53030; color: white; padding: 2px 8px; border-radius: 20px; font-size: 12px; font-weight: bold;">
-            Qté: {{ item.articleQty }}
-          </span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 15px;">
-          <span style="font-weight: bold; color: #4a5568;">{{ (item.prix * (item.articleQty || 1)) | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
-          <button (click)="retirerArticle(item.id)" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">- Retirer</button>
-        </div>
-      </div>
-
-      <div *ngIf="maListeArticles.length > 0" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 18px; font-weight: bold; color: #4a5568;">Total de la liste :</span>
-        <span style="font-size: 22px; font-weight: 800; color: #22c55e;">{{ totalPrix | currency:'EUR':'symbol':'1.2-2':'fr' }}</span>
-      </div>
-    </div>
-
+    }
   </div>
+
+  <div class="section-catalogue" [class.disabled-catalog]="listeCloturee">
+    <h2>Catalogue du Magasin</h2>
+    
+    @if (listeCloturee) {
+      <p class="alert warning-cloture">La liste est clôturée. Vous ne pouvez plus rajouter de cadeaux.</p>
+    } @else {
+      <p class="subtitle">Articles disponibles à ajouter à votre liste de naissance :</p>
+    }
+
+    <div class="grid-catalogue">
+      @for (art of catalogueArticles; track art.id) {
+        <div class="catalogue-item">
+          <div class="item-info">
+            <h4>{{ art.nom }}</h4>
+            <span class="badge-cat">{{ art.categorie }}</span>
+            <p class="prix-cat">{{ art.prix }} €</p>
+          </div>
+          <button class="btn-ajouter" [disabled]="listeCloturee" (click)="ajouterArticle(art)">
+            Ajouter
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
 </div>
