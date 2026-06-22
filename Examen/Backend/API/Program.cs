@@ -1,58 +1,70 @@
 using Api.Middleware;
-using Api.EndPoints;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System;
-
-// Importation de tes propres extensions de services et endpoints
-using Infra; 
-using ListeDeNaissance.Core;
+using Infra;                        // Ton bon using pour l'infrastructure
+using ListeDeNaissance.Core;        // Ton bon using pour le Core
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 using ListeDeNaissance.API.Endpoints;
+using Api.EndPoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// -----------------------------------------------------------------
-// 1. CONFIGURATION DES SERVICES (AVANT builder.Build())
-// -----------------------------------------------------------------
+// Enregistrement des services de ton application
+builder.Services.AddOpenApi();
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+// =========================================================================
+// 🔌 CONNEXION DE TES SERVICES (100 % CORRIGÉ AVEC TES VRAIS NOMS)
+// =========================================================================
+builder.Services.AddMonAppliCoreServices(); 
+builder.Services.AddMyInfrastructureServices();
 
-// Configuration de la politique CORS pour autoriser Angular
-builder.Services.AddCors(options =>
+#region Authentication and Authorization
+
+
+builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AllowAngularApp", policy =>
-    {
-        policy.WithOrigins("http://localhost:4200") // Ton port Angular
-              .AllowAnyHeader()                     // Autorise le Content-Type, les tokens, etc.
-              .AllowAnyMethod()                     // Autorise POST, GET, PUT, DELETE
-              .AllowCredentials();                  // Optionnel : Autorise les cookies/sessions si besoin
-    });
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 });
 
-// Exemple de configuration de ta base de données (à adapter avec ton vrai DbContext)
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+#endregion
+
+#region Configuration du CORS (Pour autoriser ton Angular)
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost",
+        policy =>
+        {
+            policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
+#endregion
 
 var app = builder.Build();
 
-// -----------------------------------------------------------------
-// 2. CONFIGURATION DU PIPELINE HTTP (APRÈS builder.Build())
-// -----------------------------------------------------------------
+// Gestionnaire global des erreurs
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>(); 
 
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseCors("AllowLocalhost"); 
+}
 
-// /!\ L'ORDRE ICI EST CRUCIAL POUR EVITER LES ERREURS /!\
+app.UseHttpsRedirection();
 
-app.UseRouting();
-
-// Activation globale du CORS (Placé obligatoirement AVANT l'authentification/autorisation)
-app.UseCors("AllowAngularApp");
-
-app.UseHttpsRedirection(); // Si tu utilises aussi du HTTPS en parallèle
-
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+
+#region Endpoints (Routes de ton application Liste de Naissance)
+
+// On active uniquement TES routes d'authentification
+app.MapCompteRoutes(); 
+
+#endregion
 
 app.Run();

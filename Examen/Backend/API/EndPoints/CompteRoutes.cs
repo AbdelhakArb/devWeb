@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using ListeDeNaissance.Core.UseCases;
+using ListeDeNaissance.Core.UseCases.Abstractions;
 using ListeDeNaissance.Core.Models;
 using System;
 using System.Threading.Tasks;
@@ -12,16 +13,19 @@ namespace ListeDeNaissance.API.Endpoints
     {
         public static void MapCompteRoutes(this IEndpointRouteBuilder routes)
         {
+            var group = routes.MapGroup("/api/comptes")
+                              .WithTags("Comptes");
+
             // =========================================================================
             // 1. ROUTE D'INSCRIPTION DU PARENT
             // =========================================================================
-            routes.MapPost("/api/comptes/inscription-parent", async (CompteParent nouveauParent, IAuthentificationUseCase authUseCase) =>
+            group.MapPost("/inscription-parent", async (
+                [FromBody] CompteParent nouveauParent, 
+                [FromServices] IInscrireParentUseCase useCase) =>
             {
                 try
                 {
-                    // On passe l'objet directement au UseCase qui gère la logique métier
-                    await authUseCase.InscrireParentAsync(nouveauParent);
-                    
+                    await useCase.ExecuterAsync(nouveauParent);
                     return Results.Json(new { message = "Compte parent créé avec succès !" }, statusCode: 201);
                 }
                 catch (InvalidOperationException ex)
@@ -37,11 +41,13 @@ namespace ListeDeNaissance.API.Endpoints
             // =========================================================================
             // 2. ROUTE D'INSCRIPTION DU VISITEUR
             // =========================================================================
-            routes.MapPost("/api/comptes/inscription-visiteur", async (Visiteur nouveauVisiteur, IAuthentificationUseCase authUseCase) =>
+            group.MapPost("/inscription-visiteur", async (
+                [FromBody] Visiteur nouveauVisiteur, 
+                [FromServices] IInscrireVisiteurUseCase useCase) =>
             {
                 try
                 {
-                    await authUseCase.InscrireVisiteurAsync(nouveauVisiteur);
+                    await useCase.ExecuterAsync(nouveauVisiteur);
                     return Results.Json(new { message = "Compte visiteur créé avec succès !" }, statusCode: 201);
                 }
                 catch (InvalidOperationException ex)
@@ -55,15 +61,15 @@ namespace ListeDeNaissance.API.Endpoints
             });
 
             // =========================================================================
-            // 3. ROUTE DE CONNEXION DU PARENT
+            // 3. ROUTE DE CONNEXION DU PARENT (Renvoie l'objet Parent directement)
             // =========================================================================
-            routes.MapPost("/api/comptes/connexion-parent", async (LoginRequest loginData, IAuthentificationUseCase authUseCase) =>
+            group.MapPost("/connexion-parent", async (
+                [FromBody] LoginRequest loginData, 
+                [FromServices] IConnexionParentUseCase useCase) =>
             {
                 try
                 {
-                    // L'API extrait l'email et le mot de passe pour les donner au UseCase
-                    var parent = await authUseCase.ConnexionParentAsync(loginData.Email, loginData.MotDePasse);
-                    
+                    var parent = await useCase.ExecuterAsync(loginData.Email, loginData.MotDePasse);
                     return Results.Ok(new { message = "Connexion réussie !", utilisateur = parent });
                 }
                 catch (UnauthorizedAccessException ex)
@@ -77,13 +83,15 @@ namespace ListeDeNaissance.API.Endpoints
             });
 
             // =========================================================================
-            // 4. ROUTE DE CONNEXION DU VISITEUR
+            // 4. ROUTE DE CONNEXION DU VISITEUR (Renvoie l'objet Visiteur directement)
             // =========================================================================
-            routes.MapPost("/api/comptes/connexion-visiteur", async (LoginRequest loginData, IAuthentificationUseCase authUseCase) =>
+            group.MapPost("/connexion-visiteur", async (
+                [FromBody] LoginRequest loginData, 
+                [FromServices] IConnexionVisiteurUseCase useCase) =>
             {
                 try
                 {
-                    var visiteur = await authUseCase.ConnexionVisiteurAsync(loginData.Email, loginData.MotDePasse);
+                    var visiteur = await useCase.ExecuterAsync(loginData.Email, loginData.MotDePasse);
                     return Results.Ok(new { message = "Connexion réussie !", utilisateur = visiteur });
                 }
                 catch (UnauthorizedAccessException ex)

@@ -2,8 +2,7 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using Infra.Repositories.Abstractions;
-using CoreModels = ListeDeNaissance.Core.Models; // Notre alias fétiche pour le Core
-
+using Infra.Models;
 namespace Infra.Repositories
 {
     public class ArticleRepository : IArticleRepository
@@ -17,18 +16,17 @@ namespace Infra.Repositories
         }
 
         private MySqlConnection GetConnection() => new MySqlConnection(_connectionString);
-
-        // On utilise le modèle PresenceArticleDansListe du Core
-        public CoreModels.PresenceArticleDansListe? GetPresenceArticleById(int presenceArticleId)
+        
+        public PresenceArticleDansListe? GetPresenceArticleById(int presenceArticleId)
         {
             using var connection = GetConnection();
             var sql = "SELECT * FROM presencearticledansliste WHERE idPresenceArticleDansListe = @Id";
             
-            return connection.QuerySingleOrDefault<CoreModels.PresenceArticleDansListe>(sql, new { Id = presenceArticleId });
+            return connection.QuerySingleOrDefault<PresenceArticleDansListe>(sql, new { Id = presenceArticleId });
         }
 
         // On utilise le modèle Reservation du Core
-        public void CreateReservation(CoreModels.Reservation reservation)
+        public void CreateReservation(Infra.Models.Reservation reservation)
         {
             using var connection = GetConnection();
             var sql = @"INSERT INTO reservation (quantiteReservee, nomVisiteur, messageVisiteur, statusReservation, presenceArticleDansListeId) 
@@ -36,5 +34,15 @@ namespace Infra.Repositories
 
             connection.Execute(sql, reservation);
         }
+        // 🛠️ AJOUTE CETTE MÉTHODE TOUT EN BAS DE TON REPOSITORY :
+        public async Task<IEnumerable<Article>> ObtenirTousLesArticlesAsync()
+        {
+            using var connection = GetConnection();
+            var sql = "SELECT * FROM article"; 
+            
+            // Dapper s'occupe de mapper automatiquement les colonnes SQL vers ton modèle Core !
+            return await connection.QueryAsync<Article>(sql);
+        }
     }
+   
 }
