@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Routing;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ListeDeNaissance.Core.Models;
-using ListeDeNaissance.Core.Usecases.Abstractions;
 using ListeDeNaissance.Core.UseCases.Abstractions;
 
 namespace Api.EndPoints

@@ -1,6 +1,6 @@
 using ListeDeNaissance.Core.Models;
 
-namespace ListeDeNaissance.Core.Usecases.Abstractions;
+namespace ListeDeNaissance.Core.UseCases.Abstractions;
 
 public interface IReserverArticleUseCase
 {

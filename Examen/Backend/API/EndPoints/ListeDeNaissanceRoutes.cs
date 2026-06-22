@@ -19,7 +19,7 @@ namespace Api.EndPoints
             var group = app.MapGroup("/api/listedenaissance")
                            .WithTags("ListeDeNaissance");
 
-            // --- 1. CRÉER UNE LISTE ---
+
             group.MapPost("", async (
                 [FromBody] CreerListeDto dto,
                 [FromServices] ICreerListeDeNaissanceUseCase useCase) =>
@@ -112,21 +112,23 @@ namespace Api.EndPoints
                 }
             });
 
-            // --- 6. SOUMETTRE LE PANIER DE RÉSERVATION VISITEUR ---
-            group.MapPost("/reserver", async (
-                [FromBody] CoreModels.PanierReservationDto panier,
-                [FromServices] ISoumettreReservationsUseCase useCase) =>
-            {
-                try
-                {
-                    await useCase.ExecuterAsync(panier);
-                    return Results.Ok(new { message = "Réservations enregistrées avec succès !" });
-                }
-                catch (Exception ex)
-                {
-                    return Results.BadRequest(new { error = ex.Message });
-                }
-            });
+           // --- 6. SOUMETTRE LE PANIER DE RÉSERVATION VISITEUR ---
+group.MapPost("/reserver", async (
+    [FromBody] dynamic panier, // Utilise 'dynamic' pour ignorer la vérification de type statique
+    [FromServices] ISoumettreReservationsUseCase useCase) =>
+{
+    try
+    {
+        // On passe les articles dynamiquement
+        await useCase.ExecuterAsync((IEnumerable<ListeDeNaissance.Core.Models.PresenceArticleDansListe>)panier.Articles); 
+        
+        return Results.Ok(new { message = "Réservations enregistrées avec succès !" });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
         }
     }
 }

@@ -18,6 +18,10 @@ namespace Infra
             services.AddTransient<IListeDeNaissanceRepository, ListeDeNaissanceRepository>();
             services.AddTransient<IListeDeNaissanceGateway, ListeDeNaissanceGateway>();
 
+            // --- BLOC C : Gestion des Articles ---
+            services.AddTransient<IArticleRepository, ArticleRepository>();
+            services.AddTransient<IArticleGateway, ArticleGateway>(); 
+
             return services;
         }
     }
