@@ -1,22 +1,25 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using ListeDeNaissance.Core.Models;
 using ListeDeNaissance.Core.IGateways;
+using ListeDeNaissance.Core.Models;
 using ListeDeNaissance.Core.UseCases.Abstractions;
 
 namespace ListeDeNaissance.Core.UseCases
 {
     public class SoumettreReservationsUseCase : ISoumettreReservationsUseCase
     {
-        private readonly IListeDeNaissanceGateway _listeGateway;
+        private readonly IListeDeNaissanceGateway _gateway;
 
-        public SoumettreReservationsUseCase(IListeDeNaissanceGateway listeGateway)
+        public SoumettreReservationsUseCase(IListeDeNaissanceGateway gateway)
         {
-            _listeGateway = listeGateway;
+            _gateway = gateway;
         }
 
-        public async Task ExecuterAsync(PanierReservationDto panier)
+        public async Task<bool> ExecuterAsync(IEnumerable<PresenceArticleDansListe> panier)
         {
-            await _listeGateway.SoumettreReservationsAsync(panier);
+            if (panier == null) return false;
+            
+            return await _gateway.SoumettreReservationsAsync(panier);
         }
     }
 }

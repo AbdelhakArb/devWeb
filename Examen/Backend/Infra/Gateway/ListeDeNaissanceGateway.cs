@@ -118,14 +118,17 @@ namespace Infra.Gateway
             return await _repository.DecrementerQuantiteArticleRepoAsync(listeId, articleId);
         }
 
+        // Dans ta classe ListeDeNaissanceGateway :
         public async Task<bool> SoumettreReservationsAsync(IEnumerable<CoreModels.PresenceArticleDansListe> panier)
         {
+            // Mapping du modèle Core vers le modèle Infra (SOLID - Séparation des préoccupations)
             var infraPanier = panier.Select(item => new Infra.Models.PresenceArticleDansListe
             {
                 ListeDeNaissanceId = item.ListeDeNaissanceId,
                 ArticleId = item.ArticleId,
                 QtySouhaitee = item.QtySouhaitee
             });
+
             return await _repository.SoumettreReservationsRepoAsync(infraPanier);
         }
     }

@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using ListeDeNaissance.Core.IGateways;
 using ListeDeNaissance.Core.Models;
-using ListeDeNaissance.Core.Usecases.Abstractions;
+using ListeDeNaissance.Core.UseCases.Abstractions;
 
 namespace ListeDeNaissance.Core.UseCases
 {

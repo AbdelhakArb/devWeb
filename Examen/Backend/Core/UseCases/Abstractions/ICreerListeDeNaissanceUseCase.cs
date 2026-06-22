@@ -2,7 +2,7 @@ using ListeDeNaissance.Core.Models;
 using System.Threading.Tasks;
 
 
-namespace ListeDeNaissance.Core.Usecases.Abstractions;
+namespace ListeDeNaissance.Core.UseCases.Abstractions;
 
 public interface ICreerListeDeNaissanceUseCase
 {

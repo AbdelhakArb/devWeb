@@ -42,7 +42,7 @@ builder.Services.AddCors(options =>
 });
 
 #endregion
-
+builder.Services.AddAuthentication();
 var app = builder.Build();
 
 // Gestionnaire global des erreurs

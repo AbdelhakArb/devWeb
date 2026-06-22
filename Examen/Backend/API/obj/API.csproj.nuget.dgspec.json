@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\API\\API.csproj": {}
+    "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\api\\API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\API\\API.csproj": {
+    "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\api\\API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\API\\API.csproj",
+        "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\api\\API.csproj",
         "projectName": "API",
-        "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\API\\API.csproj",
+        "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\api\\API.csproj",
         "packagesPath": "C:\\Users\\cash\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\API\\obj\\",
+        "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\cash\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -26,11 +26,11 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Core\\Core.csproj": {
-                "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Core\\Core.csproj"
+              "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj": {
+                "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj"
               },
-              "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Infra\\Infra.csproj": {
-                "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Infra\\Infra.csproj"
+              "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\Infra.csproj": {
+                "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\Infra.csproj"
               }
             }
           }
@@ -501,14 +501,14 @@
         }
       }
     },
-    "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Core\\Core.csproj": {
+    "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Core\\Core.csproj",
+        "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj",
         "projectName": "Core",
-        "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Core\\Core.csproj",
+        "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj",
         "packagesPath": "C:\\Users\\cash\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Core\\obj\\",
+        "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\cash\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -840,14 +840,14 @@
         }
       }
     },
-    "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Infra\\Infra.csproj": {
+    "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\Infra.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Infra\\Infra.csproj",
+        "projectUniqueName": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\Infra.csproj",
         "projectName": "Infra",
-        "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Infra\\Infra.csproj",
+        "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\Infra.csproj",
         "packagesPath": "C:\\Users\\cash\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Infra\\obj\\",
+        "outputPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Infra\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\cash\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -862,8 +862,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Core\\Core.csproj": {
-                "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\Backend\\Core\\Core.csproj"
+              "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj": {
+                "projectPath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj"
               }
             }
           }
