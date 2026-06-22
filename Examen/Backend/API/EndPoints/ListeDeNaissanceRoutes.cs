@@ -1,7 +1,10 @@
-using ListeDeNaissance.Core.Usecases.Abstractions;
-using CoreModels = ListeDeNaissance.Core.Models;
-using ListeDeNaissance.Core.IGateways;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using ListeDeNaissance.Core.UseCases.Abstractions;
+using CoreModels = ListeDeNaissance.Core.Models;
+using System;
 
 namespace Api.EndPoints
 {
@@ -13,39 +16,39 @@ namespace Api.EndPoints
     {
         public static void MapListeDeNaissanceRoutes(this IEndpointRouteBuilder app)
         {
-            // --- 1. CRÉER UNE LISTE (Utilise CreerListeDto) ---
-            app.MapPost("/api/listedenaissance", async (
+            var group = app.MapGroup("/api/listedenaissance")
+                           .WithTags("ListeDeNaissance");
+
+            // --- 1. CRÉER UNE LISTE ---
+            group.MapPost("", async (
                 [FromBody] CreerListeDto dto,
-                ICreerListeDeNaissanceUseCase creerListeUseCase) =>
+                [FromServices] ICreerListeDeNaissanceUseCase useCase) =>
             {
                 if (dto == null || string.IsNullOrWhiteSpace(dto.NomListeDeNaissance))
                 {
                     return Results.BadRequest("Données de liste invalides.");
                 }
 
-                // On convertit le DTO vers le modèle attendu par le UseCase
                 var nouvelleListe = new CoreModels.ListeDeNaissance
                 {
                     CompteParentId = dto.CompteParentId,
                     NomListeDeNaissance = dto.NomListeDeNaissance
                 };
 
-                await creerListeUseCase.ExecuterAsync(nouvelleListe);
-
+                await useCase.ExecuterAsync(nouvelleListe);
                 return Results.Ok(nouvelleListe);
             });
 
-            // --- 2. AJOUTER UN ARTICLE DANS UNE LISTE (Utilise AjouterArticleDto) ---
-            app.MapPost("/api/listedenaissance/article", async (
+            // --- 2. AJOUTER UN ARTICLE DANS UNE LISTE ---
+            group.MapPost("/article", async (
                 [FromBody] AjouterArticleDto dto,
-                IListeDeNaissanceGateway listeGateway) =>
+                [FromServices] IAjouterArticleDansListeUseCase useCase) =>
             {
                 if (dto == null || dto.ListeDeNaissanceId <= 0 || dto.ArticleId <= 0 || dto.QtySouhaitee <= 0)
                 {
                     return Results.BadRequest("Les données fournies sont invalides (ID ou quantité incorrects).");
                 }
 
-                // On mappe vers l'objet métier PresenceArticleDansListe
                 var presenceArticle = new CoreModels.PresenceArticleDansListe
                 {
                     ListeDeNaissanceId = dto.ListeDeNaissanceId,
@@ -53,29 +56,28 @@ namespace Api.EndPoints
                     QtySouhaitee = dto.QtySouhaitee
                 };
 
-                await listeGateway.AjouterArticleDansListeAsync(presenceArticle);
-
+                await useCase.ExecuterAsync(presenceArticle);
                 return Results.Ok(new { message = "L'article a bien été ajouté à la liste de naissance !" });
             });
 
             // --- 3. RÉCUPÉRER LES ARTICLES POUR RÉSERVATION ---
-            app.MapGet("/api/listedenaissance/{listeId:int}/articles", async (
+            group.MapGet("/{listeId:int}/articles", async (
                 int listeId,
-                IListeDeNaissanceGateway listeGateway) =>
+                [FromServices] IObtenirArticlesListeUseCase useCase) =>
             {
-                var articles = await listeGateway.GetArticlesPourReservationAsync(listeId);
+                var articles = await useCase.ExecuterAsync(listeId);
                 return Results.Ok(articles);
             });
 
             // --- 4. INCREMENTER QUANTITÉ ---
-            app.MapPut("/api/listedenaissance/{listeId:int}/articles/{articleId:int}/increment", async (
+            group.MapPut("/{listeId:int}/articles/{articleId:int}/increment", async (
                 int listeId,
                 int articleId,
-                IListeDeNaissanceGateway listeGateway) =>
+                [FromServices] IIncrementerArticleListeUseCase useCase) =>
             {
                 try
                 {
-                    int nouvelleQty = await listeGateway.IncrementerQuantiteArticleAsync(listeId, articleId);
+                    int nouvelleQty = await useCase.ExecuterAsync(listeId, articleId);
                     return Results.Ok(new
                     {
                         message = "Quantité incrémentée avec succès !",
@@ -89,14 +91,14 @@ namespace Api.EndPoints
             });
 
             // --- 5. DÉCRÉMENTER QUANTITÉ ---
-            app.MapPut("/api/listedenaissance/{listeId:int}/articles/{articleId:int}/decrement", async (
+            group.MapPut("/{listeId:int}/articles/{articleId:int}/decrement", async (
                 int listeId,
                 int articleId,
-                IListeDeNaissanceGateway listeGateway) =>
+                [FromServices] IDecrementerArticleListeUseCase useCase) =>
             {
                 try
                 {
-                    int nouvelleQty = await listeGateway.DecrementerQuantiteArticleAsync(listeId, articleId);
+                    int nouvelleQty = await useCase.ExecuterAsync(listeId, articleId);
 
                     return Results.Ok(new
                     {
@@ -111,13 +113,13 @@ namespace Api.EndPoints
             });
 
             // --- 6. SOUMETTRE LE PANIER DE RÉSERVATION VISITEUR ---
-            app.MapPost("/api/listedenaissance/reserver", async (
+            group.MapPost("/reserver", async (
                 [FromBody] CoreModels.PanierReservationDto panier,
-                IListeDeNaissanceGateway listeGateway) =>
+                [FromServices] ISoumettreReservationsUseCase useCase) =>
             {
                 try
                 {
-                    bool succes = await listeGateway.SoumettreReservationsAsync(panier);
+                    await useCase.ExecuterAsync(panier);
                     return Results.Ok(new { message = "Réservations enregistrées avec succès !" });
                 }
                 catch (Exception ex)

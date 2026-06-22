@@ -1,23 +1,24 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ListeDeNaissance.Core.Models;
 
 namespace ListeDeNaissance.Core.IGateways
 {
     public interface IListeDeNaissanceGateway
     {
-        // Utilisation du chemin complet pour éviter la confusion entre namespace et classe
-        Task<IEnumerable<Models.ListeDeNaissance>> ObtenirToutesLesListesAsync();
-        Task<Models.ListeDeNaissance?> ObtenirListeParIdAsync(int id);
-        Task<IEnumerable<Models.ListeDeNaissance>> ObtenirListesParParentIdAsync(int parentId);
-        Task EnregistrerListeAsync(Models.ListeDeNaissance liste);
-        Task ModifierListeAsync(Models.ListeDeNaissance liste);
+        // CRUD Listes
+        Task EnregistrerListeAsync(ListeDeNaissance.Core.Models.ListeDeNaissance liste);
+        Task<IEnumerable<ListeDeNaissance.Core.Models.ListeDeNaissance>> ObtenirToutesLesListesAsync();
+        Task<ListeDeNaissance.Core.Models.ListeDeNaissance?> ObtenirListeParIdAsync(int id);
+        Task<IEnumerable<ListeDeNaissance.Core.Models.ListeDeNaissance>> ObtenirListesParParentIdAsync(int parentId);
+        Task ModifierListeAsync(ListeDeNaissance.Core.Models.ListeDeNaissance liste);
         Task SupprimerListeAsync(int id);
-        
-        // Méthodes requises par tes routes existantes pour les articles
-        Task AjouterArticleDansListeAsync(Models.PresenceArticleDansListe presenceArticle);
-        Task<IEnumerable<object>> GetArticlesPourReservationAsync(int listeId);
+
+        // Gestion Articles et Réservations
+        Task AjouterArticleDansListeAsync(ListeDeNaissance.Core.Models.PresenceArticleDansListe presenceArticle);
+        Task<IEnumerable<ListeDeNaissance.Core.Models.PresenceArticleDansListe>> GetArticlesPourReservationAsync(int listeId);
         Task<int> IncrementerQuantiteArticleAsync(int listeId, int articleId);
         Task<int> DecrementerQuantiteArticleAsync(int listeId, int articleId);
-        Task<bool> SoumettreReservationsAsync(Models.PanierReservationDto panier);
+        Task<bool> SoumettreReservationsAsync(IEnumerable<PresenceArticleDansListe> panier);
     }
 }

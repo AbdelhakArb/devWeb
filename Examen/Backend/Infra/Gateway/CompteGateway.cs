@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using ListeDeNaissance.Core.IGateways;
 using ListeDeNaissance.Core.Models;
 using Infra.Repositories.Abstractions;
-using BCrypt.Net; // Utilisable ici car installé dans l'Infra !
 
 namespace Infra.Gateway
 {
@@ -15,52 +14,38 @@ namespace Infra.Gateway
             _compteRepository = compteRepository;
         }
 
-        public async Task<CompteParent?> ObtenirParentParEmailAsync(string email)
-        {
-            return await _compteRepository.GetCompteByEmailAsync(email);
-        }
+        public async Task<CompteParent?> ObtenirParentParEmailAsync(string email) => await _compteRepository.GetCompteByEmailAsync(email);
+        public async Task<Visiteur?> ObtenirVisiteurParEmailAsync(string email) => await _compteRepository.GetVisiteurByEmailAsync(email);
 
-        public async Task CreerCompteParentAsync(CompteParent parent)
+        public async Task InscrireParentAsync(CompteParent parent)
         {
+            parent.MotDePasseCompte = BCrypt.Net.BCrypt.HashPassword(parent.MotDePasseCompte);
             await _compteRepository.CreateCompteAsync(parent);
         }
 
-        public async Task<Visiteur?> ObtenirVisiteurParEmailAsync(string email)
+        public async Task InscrireVisiteurAsync(Visiteur visiteur)
         {
-            return await _compteRepository.GetVisiteurByEmailAsync(email);
-        }
-
-        public async Task CreerCompteVisiteurAsync(Visiteur visiteur)
-        {
+            visiteur.VisiteurMdp = BCrypt.Net.BCrypt.HashPassword(visiteur.VisiteurMdp);
             await _compteRepository.CreateVisiteurAsync(visiteur);
         }
 
-        // =========================================================================
-        // IMPLÉMENTATION DE LA VÉRIFICATION SÉCURISÉE (AVEC BCRYPT)
-        // =========================================================================
-        
         public async Task<CompteParent?> VerifierConnexionParentAsync(string email, string motDePasseBrut)
         {
             var parent = await _compteRepository.GetCompteByEmailAsync(email);
-            
-            // Si le parent existe, on utilise BCrypt pour comparer le mot de passe
             if (parent != null && BCrypt.Net.BCrypt.Verify(motDePasseBrut, parent.MotDePasseCompte))
             {
-                return parent; // Connexion réussie
+                return parent; 
             }
-            
-            return null; // Identifiants invalides
+            return null; 
         }
 
         public async Task<Visiteur?> VerifierConnexionVisiteurAsync(string email, string motDePasseBrut)
         {
             var visiteur = await _compteRepository.GetVisiteurByEmailAsync(email);
-            
             if (visiteur != null && BCrypt.Net.BCrypt.Verify(motDePasseBrut, visiteur.VisiteurMdp))
             {
                 return visiteur;
             }
-            
             return null;
         }
     }

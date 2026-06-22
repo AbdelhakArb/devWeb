@@ -8,15 +8,25 @@ public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddMonAppliCoreServices(this IServiceCollection services)
     {
-        // =========================================================================
-        // BLOC A : USECASE AUTHENTIFICATION & COMPTES
-        // =========================================================================
-        services.AddScoped<IAuthentificationUseCase, AuthentificationUseCase>();
+        // UseCases de Connexion/Inscription
+        services.AddScoped<IConnexionParentUseCase, ConnexionParentUseCase>();
+        services.AddScoped<IConnexionVisiteurUseCase, ConnexionVisiteurUseCase>();
+        services.AddScoped<IInscrireParentUseCase, InscrireParentUseCase>();
+        services.AddScoped<IInscrireVisiteurUseCase, InscrireVisiteurUseCase>();
 
-        // =========================================================================
-        // BLOC B : USECASE GESTION DES LISTES DE NAISSANCE
-        // =========================================================================
-        services.AddScoped<IGestionListeUseCase, GestionListeUseCase>();
+        // UseCases de Gestion Liste
+        services.AddScoped<ICreerListeDeNaissanceUseCase, CreerListeDeNaissanceUseCase>();
+        
+        // UseCases de gestion des articles dans les listes
+        services.AddScoped<IAjouterArticleDansListeUseCase, AjouterArticleDansListeUseCase>();
+        services.AddScoped<IIncrementerArticleListeUseCase, IncrementerArticleListeUseCase>();
+        services.AddScoped<IDecrementerArticleListeUseCase, DecrementerArticleListeUseCase>();
+        services.AddScoped<IObtenirArticlesListeUseCase, ObtenirArticlesListeUseCase>();
+        services.AddScoped<IObtenirArticlesUseCase, ObtenirArticlesUseCase>();
+        
+        // UseCases de Réservation
+        services.AddScoped<IReserverArticleUseCase, ReserverArticleUseCase>();
+        services.AddScoped<ISoumettreReservationsUseCase, SoumettreReservationsUseCase>();
 
         return services;
     }

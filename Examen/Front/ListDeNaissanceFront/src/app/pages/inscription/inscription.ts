@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth';
 export class InscriptionComponent {
   typeUtilisateur = signal<'parent' | 'visiteur'>('parent');
 
-  // Champs du formulaire (Signals locaux)
+  // Champs du formulaire (Signals réactifs locaux)
   nom = signal<string>('');
   prenom = signal<string>('');
   email = signal<string>('');
@@ -49,7 +49,7 @@ export class InscriptionComponent {
     let payload: any = {};
     const mode = this.typeUtilisateur();
 
-    // Mapping strict avec les objets de ton Backend C#
+    // Mapping strict à la lettre près avec tes classes C# (CompteParent et Visiteur)
     if (mode === 'parent') {
       payload = {
         nomPremierParent: this.nom(),
@@ -73,7 +73,7 @@ export class InscriptionComponent {
         this.messageSucces.set(reponse.message || "Compte créé avec succès ! Redirection...");
         setTimeout(() => {
           this.isSubmitting.set(false);
-          this.router.navigate(['/']); // Redirection vers le Hub d'accueil
+          this.router.navigate(['/']); // Redirection vers le hub d'accueil ou page de choix
         }, 2000);
       },
       error: (err: any) => {
