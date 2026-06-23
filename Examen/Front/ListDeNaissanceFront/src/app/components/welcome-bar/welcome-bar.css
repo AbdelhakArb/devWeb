@@ -1,0 +1,18 @@
+.status-bar { 
+  background-color: #e3f2fd; 
+  padding: 12px; 
+  text-align: center; 
+  border-bottom: 2px solid #bbdefb;
+  margin-bottom: 20px;
+}
+
+.status-bar a {
+  text-decoration: none;
+  color: #007bff;
+  margin-right: 10px;
+}
+
+.status-bar button { 
+  margin-left: 15px; 
+  cursor: pointer; 
+}

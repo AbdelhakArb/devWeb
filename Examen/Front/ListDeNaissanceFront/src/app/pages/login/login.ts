@@ -1,19 +1,20 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router'; // BIEN AJOUTER RouterLink ICI !
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink], // BIEN L'AJOUTER DANS LES IMPORTS ICI !
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
 export class LoginComponent {
   email: string = '';
   motDePasse: string = '';
+  userType: 'Parent' | 'Visiteur' = 'Visiteur'; // Valeur par défaut
   
   messageErreur: string = '';
   isSubmitting: boolean = false;
@@ -29,9 +30,15 @@ export class LoginComponent {
     this.isSubmitting = true;
     this.messageErreur = '';
 
-    this.authService.connexionParent(this.email, this.motDePasse).subscribe({
+    // Appel du service via la méthode générique que nous avons créée
+    this.authService.connexion(this.email, this.motDePasse, this.userType).subscribe({
       next: () => {
-        this.router.navigate(['/gestion-liste']);
+        // Redirection adaptée au profil
+        if (this.userType === 'Parent') {
+          this.router.navigate(['/gestion-liste']);
+        } else {
+          this.router.navigate(['/visiteur-view']);
+        }
       },
       error: (err: any) => {
         this.isSubmitting = false;

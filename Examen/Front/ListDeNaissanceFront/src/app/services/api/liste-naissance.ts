@@ -8,7 +8,7 @@ import { Article } from './models/article';
   providedIn: 'root'
 })
 export class ListeNaissanceService {
-  private apiUrl = 'https://localhost:5141/api/listenaissance';
+  private apiUrl = 'http://localhost:5141/api/listenaissance';
 
   constructor(private http: HttpClient) {}
 

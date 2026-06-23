@@ -16,7 +16,7 @@ namespace Api.EndPoints
     {
         public static void MapListeDeNaissanceRoutes(this IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("/api/listedenaissance")
+            var group = app.MapGroup("/api/listenaissance")
                            .WithTags("ListeDeNaissance");
 
 

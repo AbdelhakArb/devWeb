@@ -1,0 +1,7 @@
+@if (authService.estAuthentifie()) {
+  <div class="status-bar">
+    <a routerLink="/">Accueil</a> |
+    <span>Bienvenue {{ utilisateur()?.nom || 'Utilisateur' }} !</span>
+    <button (click)="deconnexion()">Déconnexion</button>
+  </div>
+}

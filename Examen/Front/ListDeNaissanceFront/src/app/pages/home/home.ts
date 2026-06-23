@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-home',
@@ -10,6 +11,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './home.css'
 })
 export class HomeComponent {
-  // Pas de logique lourde ici, ce sont les boutons du template (routerLink) 
-  // qui vont rediriger les utilisateurs vers les bons espaces.
+  constructor(public authService: AuthService) {}
+
+  utilisateur = computed(() => this.authService.utilisateurConnecte());
 }
