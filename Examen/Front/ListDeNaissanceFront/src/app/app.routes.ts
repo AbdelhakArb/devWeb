@@ -9,6 +9,7 @@ import { LoginComponent } from './pages/login/login';
 import { InscriptionComponent } from './pages/inscription/inscription'; // Import de l'inscription
 import { VisiteurViewComponent } from './pages/visiteur-view/visiteur-view';
 import { PaiementComponent } from './pages/paiemment/paiement';
+import { ListeModels } from './pages/liste-models/liste-models';
 
 const authGuard = () => {
   const authService = inject(AuthService);
@@ -24,13 +25,15 @@ const authGuard = () => {
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'inscription', component: InscriptionComponent }, // Nouvelle route publique
+  { path: 'inscription', component: InscriptionComponent },
   { path: 'visiteur', component: VisiteurViewComponent },
   
-  // Routes privées protégées
+  // Routes protégées
   { path: 'creer-liste', component: CreerListe, canActivate: [authGuard] },
   { path: 'gestion-liste', component: GestionListe, canActivate: [authGuard] },
   
-  { path: 'paiement', component: PaiementComponent },
+  // Pense à ajouter cette route si tu veux que le bouton "Modèles" fonctionne
+  { path: 'modeles', component: ListeModels }, 
+  
   { path: '**', redirectTo: '' }
 ];

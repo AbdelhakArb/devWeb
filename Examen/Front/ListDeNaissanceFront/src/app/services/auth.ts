@@ -6,71 +6,36 @@ import { Observable, tap } from 'rxjs';
   providedIn: 'root'
 })
 export class AuthService {
-  // Adresse IP et port exacts issus de ton Minimal API C#
   private baseUrl = 'http://localhost:5141/api/comptes';
-
-  // Gestion de l'état global avec les Signals Angular (Exigence professeur)
   private utilisateurSignal = signal<any | null>(null);
 
   public utilisateurConnecte = computed(() => this.utilisateurSignal());
   public estAuthentifie = computed(() => this.utilisateurSignal() !== null);
 
   constructor(private http: HttpClient) {
-    // Restauration automatique de la session au démarrage
     const userStocke = localStorage.getItem('babyList_user');
     if (userStocke) {
-      try {
-        this.utilisateurSignal.set(JSON.parse(userStocke));
-      } catch (e) {
-        localStorage.removeItem('babyList_user');
-      }
+      try { this.utilisateurSignal.set(JSON.parse(userStocke)); }
+      catch (e) { localStorage.removeItem('babyList_user'); }
     }
   }
 
-  /**
-   * Envoie les données vers le bon endpoint selon le type sélectionné
-   */
+  connexion(email: string, motDePasse: string, type: 'Parent' | 'Visiteur'): Observable<any> {
+    const endpoint = type === 'Parent' ? 'connexion-parent' : 'connexion-visiteur';
+    return this.http.post(`${this.baseUrl}/${endpoint}`, { email, motDePasse }).pipe(
+      tap((reponse: any) => {
+        if (reponse && reponse.utilisateur) {
+          this.utilisateurSignal.set(reponse.utilisateur);
+          localStorage.setItem('babyList_user', JSON.stringify(reponse.utilisateur));
+        }
+      })
+    );
+  }
+
   inscription(donnees: any, type: 'parent' | 'visiteur'): Observable<any> {
-    const routeFinale = type === 'parent' ? 'inscription-parent' : 'inscription-visiteur';
-    return this.http.post(`${this.baseUrl}/${routeFinale}`, donnees).pipe(
-      tap((reponseServer: any) => {
-        // Si le serveur te renvoie l'objet utilisateur créé, on le stocke
-        if (reponseServer && reponseServer.utilisateur) {
-          this.utilisateurSignal.set(reponseServer.utilisateur);
-          localStorage.setItem('babyList_user', JSON.stringify(reponseServer.utilisateur));
-        }
-      })
-    );
+    const endpoint = type === 'parent' ? 'inscription-parent' : 'inscription-visiteur';
+    return this.http.post(`${this.baseUrl}/${endpoint}`, donnees);
   }
-
-  /**
-   * Connexion Parent
-   */
-  connexionParent(email: string, motDePasse: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/connexion-parent`, { email, motDePasse }).pipe(
-      tap((reponseServer: any) => {
-        if (reponseServer && reponseServer.utilisateur) {
-          this.utilisateurSignal.set(reponseServer.utilisateur);
-          localStorage.setItem('babyList_user', JSON.stringify(reponseServer.utilisateur));
-        }
-      })
-    );
-  }
-
-  /**
-   * Connexion Visiteur
-   */
-  connexionVisiteur(email: string, motDePasse: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/connexion-visiteur`, { email, motDePasse }).pipe(
-      tap((reponseServer: any) => {
-        if (reponseServer && reponseServer.utilisateur) {
-          this.utilisateurSignal.set(reponseServer.utilisateur);
-          localStorage.setItem('babyList_user', JSON.stringify(reponseServer.utilisateur));
-        }
-      })
-    );
-  }
-
 
   deconnexion(): void {
     this.utilisateurSignal.set(null);

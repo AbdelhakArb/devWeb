@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ListeReservationService {
-  private apiUrl = 'https://localhost:5141/api/reserver'; // Vérifie ton URL exacte
+  private apiUrl = 'http://localhost:5141/api/reserver';
 
   constructor(private http: HttpClient) {}
 

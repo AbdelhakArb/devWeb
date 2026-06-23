@@ -1,26 +1,15 @@
 <div class="home-container">
-  <header class="home-header">
-    <h1>Bienvenue sur BabyList 👶✨</h1>
-    <p class="home-subtitle">La plateforme idéale pour préparer l'arrivée de bébé ou gâter vos proches.</p>
-  </header>
-
-  <div class="cards-grid">
-    <div class="home-card parents-card">
-      <div class="card-icon">🍼</div>
-      <h2>Futurs Parents</h2>
-      <p>Créez votre liste de naissance personnalisée, sélectionnez vos articles indispensables dans notre catalogue et suivez les contributions en temps réel.</p>
-      <button routerLink="/login" class="btn-home btn-parents">Accéder à mon espace</button>
-    </div>
-
-    <div class="home-card visiteurs-card">
-      <div class="card-icon">🎁</div>
-      <h2>Proches & Donateurs</h2>
-      <p>Vous souhaitez faire plaisir aux futurs parents ? Trouvez leur liste de naissance instantanément grâce à leur identifiant unique et réservez votre cadeau.</p>
-      <button routerLink="/visiteur" class="btn-home btn-visiteurs">Trouver une liste</button>
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Bienvenue sur BabyList</h1>
+      <p>L'espace dédié à vos plus beaux moments.</p>
     </div>
   </div>
 
-  <footer class="home-footer">
-    <p>© 2026 BabyList - Application de Gestion de Listes de Naissance</p>
-  </footer>
+  <div class="actions-grid">
+    <button routerLink="/creer-liste" class="btn-action green">Créer Votre Liste</button>
+    <button routerLink="/visiteur" class="btn-action blue">Offrir un Cadeau</button>
+    <button routerLink="/gestion-liste" class="btn-action yellow">Gérer Votre Liste</button>
+    <button class="btn-action gray">Voir Modèles</button>
+  </div>
 </div>
