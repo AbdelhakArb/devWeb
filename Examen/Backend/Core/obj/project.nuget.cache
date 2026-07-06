@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "V3c7czqQP+k=",
+  "dgSpecHash": "FwdB6iAM6Ck=",
   "success": true,
-  "projectFilePath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\examen\\backend\\Core\\Core.csproj",
+  "projectFilePath": "C:\\Users\\cash\\Desktop\\Dev\\devWeb\\Examen\\Backend\\Core\\Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\cash\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.9\\microsoft.extensions.dependencyinjection.abstractions.10.0.9.nupkg.sha512"
   ],
