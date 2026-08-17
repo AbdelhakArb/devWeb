@@ -8,18 +8,19 @@ namespace ListeDeNaissance.Core.UseCases
 {
     public class SoumettreReservationsUseCase : ISoumettreReservationsUseCase
     {
-        private readonly IListeDeNaissanceGateway _gateway;
+        private readonly IListeDeNaissanceGateway _listeDeNaissanceGateway;
 
-        public SoumettreReservationsUseCase(IListeDeNaissanceGateway gateway)
+        public SoumettreReservationsUseCase(IListeDeNaissanceGateway listeDeNaissanceGateway)
         {
-            _gateway = gateway;
+           _listeDeNaissanceGateway = listeDeNaissanceGateway;
         }
 
-        public async Task<bool> ExecuterAsync(IEnumerable<PresenceArticleDansListe> panier)
+        public async Task<bool> ExecuterAsync(IEnumerable<ReservationRequestItem> panier)
         {
-            if (panier == null) return false;
+            Console.WriteLine("usecase lance");
             
-            return await _gateway.SoumettreReservationsAsync(panier);
+            if (panier == null) return false;
+            return await _listeDeNaissanceGateway.SoumettreReservationsAsync(panier);
         }
     }
 }

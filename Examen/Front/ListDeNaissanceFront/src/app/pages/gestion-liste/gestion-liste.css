@@ -1,55 +1,86 @@
-.cloturee {
-  background: #e74c3c !important;
-}
-
-.disabled-catalog {
-  opacity: 0.6;
-  pointer-events: none; /* Bloque tout clic sur le catalogue */
-}
-
-.warning-cloture {
-  background-color: #fff3cd;
-  color: #856404;
-  padding: 10px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.btn-cloturer {
-  width: 100%;
-  background-color: #e67e22;
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 15px;
-  font-size: 0.95rem;
-}
-
-.confirmation-box {
-  background-color: #e8f8f5;
-  border: 1px solid #a3e4d7;
-  color: #117a65;
+.gestion-liste-container {
+  display: flex;
+  flex-direction: column;
   padding: 20px;
-  border-radius: 8px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.gestion-liste-container h2 {
+  width: 100%;
   margin-bottom: 20px;
 }
 
-.confirmation-box ul {
-  margin: 10px 0;
-  padding-left: 20px;
+.alert-cloture {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 4px;
 }
 
-.btn-payer-maintenant {
-  background-color: #27ae60;
+.actions-bar {
+  margin-bottom: 20px;
+}
+
+.btn-cloturer {
+  background-color: #dc3545;
   color: white;
   border: none;
-  padding: 12px 20px;
-  border-radius: 50px;
-  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 4px;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
-  font-size: 1rem;
+}
+
+.btn-cloturer:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.gestion-content-layout {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+}
+
+.col-gauche {
+  flex: 1;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  height: fit-content;
+}
+
+.col-droite {
+  flex: 1;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  height: fit-content;
+}
+
+.article-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.qty-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-actions button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
 }

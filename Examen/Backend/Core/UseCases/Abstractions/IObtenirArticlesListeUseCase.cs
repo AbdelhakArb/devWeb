@@ -6,6 +6,6 @@ namespace ListeDeNaissance.Core.UseCases.Abstractions
 {
     public interface IObtenirArticlesListeUseCase
     {
-        Task<IEnumerable<PresenceArticleDansListe>> ExecuterAsync(int listeId);
+        Task<IEnumerable<Article>> ExecuterAsync(int listeId);
     }
 }

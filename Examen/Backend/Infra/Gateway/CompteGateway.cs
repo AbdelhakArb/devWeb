@@ -19,13 +19,11 @@ namespace Infra.Gateway
 
         public async Task InscrireParentAsync(CompteParent parent)
         {
-            parent.MotDePasseCompte = BCrypt.Net.BCrypt.HashPassword(parent.MotDePasseCompte);
             await _compteRepository.CreateCompteAsync(parent);
         }
 
         public async Task InscrireVisiteurAsync(Visiteur visiteur)
         {
-            visiteur.VisiteurMdp = BCrypt.Net.BCrypt.HashPassword(visiteur.VisiteurMdp);
             await _compteRepository.CreateVisiteurAsync(visiteur);
         }
 

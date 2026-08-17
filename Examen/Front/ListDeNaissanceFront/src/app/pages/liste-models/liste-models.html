@@ -1,0 +1,44 @@
+<div class="container mt-4">
+  <h2>Modèles de listes de naissance</h2>
+  
+  <div class="row mt-4">
+    @for (modele of modeles(); track modele.modelListeId) {
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title text-dark fw-bold">{{ modele.modelListeNom }}</h5>
+            <p class="card-text text-secondary flex-grow-1">{{ modele.modelListeDesc }}</p>
+            <button class="btn btn-primary mt-3" (click)="consulterModele(modele)">Consulter</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (afficherModale()) {
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Articles du modèle : {{ modeleSelectionne()?.modelListeNom }}</h5>
+            <button type="button" class="btn-close" (click)="fermerModale()"></button>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group">
+              @for (article of articlesModele(); track article.articleId) {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span>{{ article.articleNom }}</span>
+                  <span class="badge bg-primary rounded-pill">{{ article.articlePrix }} €</span>
+                </li>
+              }
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fermerModale()">Fermer</button>
+            <button type="button" class="btn btn-success" (click)="utiliserModele()">Utiliser ce modèle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

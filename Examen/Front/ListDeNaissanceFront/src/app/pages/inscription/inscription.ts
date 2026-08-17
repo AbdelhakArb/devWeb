@@ -1,43 +1,38 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-inscription',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './inscription.html',
   styleUrl: '../login/login.css'
 })
 export class InscriptionComponent {
-  typeUtilisateur = signal<'parent' | 'visiteur'>('parent');
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  // Champs du formulaire (Signals réactifs locaux)
-  nom = signal<string>('');
-  prenom = signal<string>('');
-  email = signal<string>('');
-  ville = signal<string>('');
-  motDePasse = signal<string>('');
-  confirmationMdp = signal<string>('');
+  readonly typeUtilisateur = signal<'parent' | 'visiteur'>('parent');
+  
+  nom = '';
+  prenom = '';
+  email = '';
+  adresse = '';
+  cp = '';
+  ville = '';
+  pays = '';
+  motDePasse = '';
+  confirmationMdp = '';
 
-  messageErreur = signal<string>('');
-  messageSucces = signal<string>('');
-  isSubmitting = signal<boolean>(false);
+  readonly messageErreur = signal<string>('');
+  readonly messageSucces = signal<string>('');
+  readonly isSubmitting = signal<boolean>(false);
 
-  constructor(private authService: AuthService, private router: Router) {}
-
-  majChamp(champ: 'nom' | 'prenom' | 'email' | 'ville' | 'motDePasse' | 'confirmationMdp', event: Event) {
-    this[champ].set((event.target as HTMLInputElement).value);
-  }
-
-  onInscription() {
-    if (!this.nom() || !this.prenom() || !this.email() || !this.motDePasse() || !this.confirmationMdp()) {
-      this.messageErreur.set("Veuillez remplir les champs obligatoires.");
-      return;
-    }
-
-    if (this.motDePasse() !== this.confirmationMdp()) {
+  onInscription(): void {
+    if (this.motDePasse !== this.confirmationMdp) {
       this.messageErreur.set("Les mots de passe ne correspondent pas.");
       return;
     }
@@ -45,41 +40,29 @@ export class InscriptionComponent {
     this.isSubmitting.set(true);
     this.messageErreur.set('');
     this.messageSucces.set('');
-
-    let payload: any = {};
+    
     const mode = this.typeUtilisateur();
+    
+    const payload = {
+      nom: this.nom,
+      prenom: this.prenom,
+      email: this.email,
+      motDePasse: this.motDePasse,
+      adresse: this.adresse || null,
+      cp: this.cp || null,
+      ville: this.ville || null,
+      pays: this.pays || null
+    };
 
-    // Mapping strict à la lettre près avec tes classes C# (CompteParent et Visiteur)
-    if (mode === 'parent') {
-      payload = {
-        nomPremierParent: this.nom(),
-        prenomPremierParent: this.prenom(),
-        emailDeContact: this.email(),
-        motDePasseCompte: this.motDePasse(),
-        villeParent: this.ville() || null
-      };
-    } else {
-      payload = {
-        visiteurNom: this.nom(),
-        visiteurPrenom: this.prenom(),
-        visiteurEmail: this.email(),
-        visiteurMdp: this.motDePasse(),
-        visiteurVille: this.ville() || null
-      };
-    }
-
-    this.authService.inscription(payload, mode).subscribe({
-      next: (reponse: any) => {
-        this.messageSucces.set(reponse.message || "Compte créé avec succès ! Redirection...");
-        setTimeout(() => {
-          this.isSubmitting.set(false);
-          this.router.navigate(['/']); // Redirection vers le hub d'accueil ou page de choix
-        }, 2000);
+    this.authService.inscrireEtConnecter(payload, mode).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.messageSucces.set("Inscription et connexion réussies !");
+        setTimeout(() => this.router.navigate(['/']), 1500);
       },
       error: (err: any) => {
         this.isSubmitting.set(false);
-        this.messageErreur.set(err.error?.error || "Une erreur est survenue lors de l'enregistrement.");
-        console.error("Détails du rejet de validation C# :", err);
+        this.messageErreur.set(err.error?.error || err.error?.message || "Erreur lors de l'inscription.");
       }
     });
   }

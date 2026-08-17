@@ -1,95 +1,54 @@
-<div class="gestion-container">
-  
-  <div class="section-liste">
-    <h2>Ma Liste de Naissance</h2>
-    
-    <p class="info-statut">
-      Statut : 
-      @if (listeCloturee) {
-        <span class="badge cloturee">Clôturée</span>
-      } @else {
-        <span class="badge active">Active</span>
-      }
-    </p>
+<div class="gestion-liste-container">
+  <h2>Gestion de ma Liste de Naissance</h2>
 
-    @if (afficherMessageConfirmation) {
-      <div class="alert confirmation-box">
-        <h3>🎉 Liste clôturée avec succès !</h3>
-        <p>Voici le récapitulatif de votre liste :</p>
-        <ul>
-          <li>Nombre total d'articles définis : <strong>{{ totalQuantite }}</strong></li>
-          <li>Valeur totale de la liste : <strong>{{ totalPrix | number:'1.2-2' }} €</strong></li>
-        </ul>
-        <p>Il vous reste des articles non pourvus. Souhaitez-vous acheter le reste vous-même ?</p>
-        <div class="actions-confirmation">
-          <button class="btn-payer-maintenant" (click)="acheterLeReste()">Payer maintenant ({{ resteAPayer | number:'1.2-2' }} €)</button>
-        </div>
-      </div>
-    }
-
-    <div class="liste-articles-parent">
-      @for (item of maListeArticles; track item.id) {
-        <div class="card-article">
-          <div class="article-details">
-            <h3>{{ item.nom }}</h3>
-            <p class="categorie">{{ item.categorie }}</p>
-            <p class="prix">{{ item.prix }} €</p>
-          </div>
-          
-          @if (!listeCloturee) {
-            <div class="article-actions">
-              <button class="btn-qty" (click)="retirerArticle(item.id)">-</button>
-              <span class="qty-display">Quantité : <strong>{{ item.articleQty }}</strong></span>
-              <button class="btn-qty" (click)="ajouterArticle(item)">+</button>
-            </div>
-          } @else {
-            <div class="article-actions">
-              <span class="qty-display">Quantité finale : <strong>{{ item.articleQty }}</strong></span>
-            </div>
-          }
-        </div>
-      } @empty {
-        <div class="empty-msg">
-          <p>Votre liste est vide. Ajoutez des articles depuis le catalogue à droite !</p>
-        </div>
-      }
+  @if (listeCloturee()) {
+    <div class="alert-cloture">
+      Cette liste est clôturée.
     </div>
+  }
 
-    @if (maListeArticles.length > 0) {
-      <div class="totaux-box">
-        <p>Total articles sélectionnés : <strong>{{ totalQuantite }}</strong></p>
-        <p>Estimation du budget total : <strong class="prix-total">{{ totalPrix | number:'1.2-2' }} €</strong></p>
-        
-        @if (!listeCloturee) {
-          <button class="btn-cloturer" (click)="cloturerLaListe()">Clôturer la liste et voir le récapitulatif</button>
+  <div class="actions-bar">
+    <button type="button" class="btn-cloturer" (click)="ouvrirCloture()" [disabled]="listeCloturee()">
+      Clôturer la liste
+    </button>
+  </div>
+
+  <div class="gestion-content-layout">
+    <div class="col-gauche">
+      <h3>Articles de la liste</h3>
+      <div class="articles-liste">
+        @for (item of resService.articlesDeLaListe(); track item.articleId ?? item.id) 
+        {
+          <div class="article-row">
+            <span>{{ item.articleNom }}</span>
+            <span>{{ (item.articlePrix || 0) * (item.articleQty || 1) }} €</span>
+            
+            @if (!listeCloturee()) {
+              <div class="qty-actions">
+                <button type="button" (click)="modifierQuantite(item, -1)">-</button>
+                <span>Qté : {{ item.articleQty || 1 }}</span>
+                <button type="button" (click)="modifierQuantite(item, 1)">+</button>
+              </div>
+            }
+          </div>
+        } @empty {
+          <p>Aucun article dans cette liste pour le moment.</p>
         }
       </div>
-    }
-  </div>
+    </div>
 
-  <div class="section-catalogue" [class.disabled-catalog]="listeCloturee">
-    <h2>Catalogue du Magasin</h2>
-    
-    @if (listeCloturee) {
-      <p class="alert warning-cloture">La liste est clôturée. Vous ne pouvez plus rajouter de cadeaux.</p>
-    } @else {
-      <p class="subtitle">Articles disponibles à ajouter à votre liste de naissance :</p>
-    }
-
-    <div class="grid-catalogue">
-      @for (art of catalogueArticles; track art.id) {
-        <div class="catalogue-item">
-          <div class="item-info">
-            <h4>{{ art.nom }}</h4>
-            <span class="badge-cat">{{ art.categorie }}</span>
-            <p class="prix-cat">{{ art.prix }} €</p>
-          </div>
-          <button class="btn-ajouter" [disabled]="listeCloturee" (click)="ajouterArticle(art)">
-            Ajouter
-          </button>
-        </div>
-      }
+    <div class="col-droite">
+      <h3>Catalogue</h3>
+      <app-catalogue (articleAjoute)="ajouterArticle($event)"></app-catalogue>
     </div>
   </div>
 
+  @if (afficherModaleCloture()) {
+    <app-panier 
+      [items]="panierItems()" 
+      [isParent]="true"
+      (confirmer)="validerCloture()" 
+      (annuler)="fermerCloture()">
+    </app-panier>
+  }
 </div>

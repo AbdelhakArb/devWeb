@@ -1,9 +1,0 @@
-using System.Collections.Generic;
-
-namespace ListeDeNaissance.Core.Models
-{
-    public class PanierReservationDto
-    {
-        public IEnumerable<PresenceArticleDansListe> Articles { get; set; } = new List<PresenceArticleDansListe>();
-    }
-}

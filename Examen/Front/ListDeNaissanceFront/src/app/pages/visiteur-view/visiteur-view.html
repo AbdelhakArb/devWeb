@@ -1,74 +1,50 @@
-<div class="visiteur-container">
-  
-  <!-- ÉCRAN DE SUCCÈS FINAL : RÉSERVATION CONFIRMÉE -->
-  @if (reservationConfirmee) {
-    <div class="success-card">
-      <div class="success-icon">✓</div>
-      <h2>Réservation Confirmée !</h2>
-      <p>Merci pour votre générosité. Voici les détails de votre engagement :</p>
-      
-      <div class="summary-box">
-        <p>Articles réservés avec succès pour la liste : <strong>{{ listeTrouvee?.nomListeDeNaissance }}</strong></p>
-        <p>Montant global de votre don : <strong>{{ totalMontantEstime | number:'1.2-2' }} €</strong></p>
-      </div>
-
-      <h3>Que faire maintenant ?</h3>
-      <p class="instruction">Les parents seront informés de votre geste. Vous n'avez plus qu'à acheter l'article et leur offrir en main propre !</p>
-      
-      <button class="btn-primary" (click)="recommencer()">Fermer et consulter d'autres articles</button>
+@if (!listeTrouvee()) {
+  <div class="search-card">
+    <h2>Trouver une Liste de Naissance</h2>
+    <div class="search-bar">
+      <input 
+        type="text" 
+        [(ngModel)]="idListeRecherche" 
+        placeholder="Entrez l'ID de la liste..." 
+        (keyup.enter)="rechercherListe()"
+      />
+      <button type="button" class="btn-primary" (click)="rechercherListe()">Trouver la liste</button>
     </div>
-  } 
-  
-  <!-- ÉCRAN PRINCIPAL DE NAVIGATION -->
-  @else {
-    
-    <!-- Étape A : Formulaire de recherche si aucune liste n'est affichée -->
-    @if (!listeTrouvee) {
-      <div class="search-card">
-        <h2>Trouver une Liste de Naissance</h2>
-        <p class="search-subtitle">Entrez l'identifiant unique fourni par les parents pour consulter leur liste :</p>
-        
-        <div class="search-bar">
-          <input 
-            type="text" 
-            [(ngModel)]="idListeRecherche" 
-            placeholder="Ex: 1" 
-            (keyup.enter)="rechercherListe()"
-          >
-          <button class="btn-search" (click)="rechercherListe()">Trouver la liste</button>
-        </div>
 
-        @if (messageErreur) {
-          <div class="alert error">{{ messageErreur }}</div>
-        }
-      </div>
+    @if (rechercheFaite() && messageErreur()) {
+      <p class="error" style="color: #c0392b; margin-top: 15px; font-weight: bold;">{{ messageErreur() }}</p>
     }
+  </div>
+} @else {
+  <div class="liste-details-container">
+    <h2>Gestion de la Liste : {{ getNomListe(listeTrouvee()) }}</h2>
+    <h2>Numero de la liste : {{ getListId(listeTrouvee()) }}</h2>
+    <p class="status">Status de la liste : <strong>{{ getStatutLibelle(listeTrouvee()) }}</strong></p>
 
-    <!-- Étape B : Affichage de la liste trouvée et de ses cadeaux -->
-    @if (listeTrouvee) {
-      <div class="liste-header">
-        <button class="btn-back" (click)="recommencer()">← Retour à la recherche</button>
-        <h2>Gestion de la Liste : {{ listeTrouvee.nomListeDeNaissance }}</h2>
-        <p class="meta-info">Lieu de retrait : <strong>{{ listeTrouvee.lieuListe || 'Non spécifié' }}</strong></p>
+    @if (estCloturee()) {
+      <div class="alert-cloturee">
+        <h3>⚠️ Cette liste est clôturée</h3>
+        <p>Les réservations ne sont plus possibles pour cette liste. Veuillez contacter les parents pour plus d'informations.</p>
       </div>
+    } @else {
+      <p class="date-event">Date événement : {{ getDateEvenement(listeTrouvee()) | date:'fullDate' }}</p>
 
       <div class="grid-cadeaux">
-        @for (item of articlesListe; track item.id) {
+        @for (item of articlesListe; track getId(item)) {
           <div class="cadeau-card">
             <div class="cadeau-info">
-              <h3>{{ item.nom }}</h3>
-              <p class="category-badge">{{ item.categorie }}</p>
-              <p class="price">{{ item.prix }} €</p>
-              <!-- Quantité disponible calculée (quantité totale en magasin moins quantité déjà prise dans la DB) -->
-              <p class="stock-info">Quantité restante disponible : <strong>{{ item.articleQty || 1 }}</strong></p>
+              <h3>{{ getNom(item) }}</h3>
+              <p class="category-badge">{{ item.categorie || item.Categorie || 'Général' }}</p>
+              <p class="price">{{ getPrix(item) }} €</p>
+              <p class="stock-info">Quantité restante disponible : <strong>{{ getStock(item) }}</strong></p>
             </div>
 
             <div class="cadeau-booking">
               <label>Je réserve :</label>
               <div class="qty-selector">
-                <button (click)="modifierQuantiteSouhaitee(item.id, -1, item.articleQty || 1)">-</button>
-                <span class="qty-val">{{ quantitesReservees[item.id] }}</span>
-                <button (click)="modifierQuantiteSouhaitee(item.id, 1, item.articleQty || 1)">+</button>
+                <button type="button" (click)="modifierQuantiteSouhaitee(getId(item), -1, getStock(item))">-</button>
+                <span class="qty-val">{{ quantitesReservees[getId(item)] || 0 }}</span>
+                <button type="button" (click)="modifierQuantiteSouhaitee(getId(item), 1, getStock(item))">+</button>
               </div>
             </div>
           </div>
@@ -77,42 +53,47 @@
         }
       </div>
 
-      <!-- Barre de validation flottante en bas si des articles sont cochés -->
       @if (totalArticlesSelectionnes > 0) {
         <div class="floating-checkout">
-          <p>Articles sélectionnés : <strong>{{ totalArticlesSelectionnes }}</strong></p>
-          <p>Montant total estimé : <strong>{{ totalMontantEstime | number:'1.2-2' }} €</strong></p>
-          <button class="btn-checkout" (click)="ouvrirConfirmation()">Confirmer la Réservation</button>
+          <div>
+            <span>Articles sélectionnés : <strong>{{ totalArticlesSelectionnes }}</strong></span> | 
+            <span>Montant total estimé : <strong>{{ totalMontantEstime | number:'1.2-2' }} €</strong></span>
+          </div>
+          <button type="button" class="btn-checkout" (click)="ouvrirConfirmation()">Confirmer la Réservation</button>
         </div>
       }
     }
-  }
+  </div>
+}
 
-  <!-- FENÊTRE MODALE POPUP (CONFIRMATION + MESSAGE OPTIONNEL) -->
-  @if (afficherModale) {
-    <div class="modal-overlay">
-      <div class="modal-content">
-        <h2>Confirmer votre Réservation</h2>
-        <p>Voulez-vous ajouter un message aux parents ? (Ceci est optionnel) :</p>
-        
-        <textarea 
-          [(ngModel)]="messagePourParents" 
-          placeholder="Félicitations pour l'arrivée de bébé ! De la part de..." 
-          maxlength="255"
-          rows="4"
-        ></textarea>
-        
-        <div class="modal-summary">
-          <p>Total articles : <strong>{{ totalArticlesSelectionnes }}</strong></p>
-          <p>Montant estimé : <strong>{{ totalMontantEstime | number:'1.2-2' }} €</strong></p>
-        </div>
+@if (afficherModale()) {
+ <app-panier 
+  [items]="panierItemsVisiteur()" 
+  [isParent]="false"
+  [visiteurId]="visiteurIdSaisi"
+  [(message)]="messageTextSaisi"
+  [(signature)]="signatureMessageSaisie"
+  (confirmer)="validerReservation($event)" 
+  (annuler)="fermerModale()">
+</app-panier>
+}
 
-        <div class="modal-actions">
-          <button class="btn-cancel" (click)="fermerModale()">Annuler</button>
-          <button class="btn-confirm" (click)="validerReservation()">Confirmer et Réserver</button>
-        </div>
+@if (reservationConfirmee()) {
+  <div class="modal-overlay">
+    <div class="modal-content success-card">
+      <h3>✅ Réservation Confirmée !</h3>
+      <p>Merci pour votre générosité. Le paiement a été validé.</p>
+      <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;"/>
+      
+      <div class="reservation-receipt" style="text-align: left; margin-bottom: 20px;">
+        <h4>Votre Réservation</h4>
+        <p><strong>Liste concernée :</strong> {{ getNomListe(listeTrouvee()) }}</p>
+        <p><strong>Montant payé :</strong> {{ totalMontantEstime | number:'1.2-2' }} €</p>
+      </div>
+
+      <div class="modal-actions" style="justify-content: center;">
+        <button type="button" class="btn-primary" (click)="recommencer()">Fermer et consulter d'autres articles</button>
       </div>
     </div>
-  }
-
-</div>
+  </div>
+}

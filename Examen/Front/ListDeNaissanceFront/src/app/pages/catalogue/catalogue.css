@@ -1,0 +1,17 @@
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  padding: 10px;
+}
+
+.article-card {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.article-card h4 {
+  margin: 0 0 10px 0;
+}

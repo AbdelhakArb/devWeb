@@ -7,6 +7,7 @@ public class Article
     public string? ArticleDesc { get; set; }
     public int? ArticleQty { get; set; }
     public decimal? ArticlePrix { get; set; }
+    public int QtyReserve { get; set; }   // ← ajoutée : quantité déjà réservée par les visiteurs
 
     // Relations
     public List<CategorieArticle> CategorieArticles { get; set; } = new();

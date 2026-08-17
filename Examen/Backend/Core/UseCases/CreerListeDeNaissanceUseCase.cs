@@ -27,10 +27,8 @@ namespace ListeDeNaissance.Core.UseCases
                 throw new ArgumentException("Le nom de la liste de naissance est obligatoire.");
             }
 
-            // On enregistre la liste via la Gateway
-            await _listeDeNaissanceGateway.EnregistrerListeAsync(nouvelleListe);
+            await _listeDeNaissanceGateway.InsertAsync(nouvelleListe);
 
-            // On retourne la liste créée pour satisfaire l'interface (Task<ListeDeNaissance>)
             return nouvelleListe;
         }
     }
