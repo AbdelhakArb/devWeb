@@ -1,8 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Infra.Repositories;
 using Infra.Repositories.Abstractions;
-using Infra.Gateway;
+using Infra.Gateways;
 using ListeDeNaissance.Core.IGateways;
+using Infra.Gateway;
+using ListeDeNaissance.Core.UseCases.Abstractions;
+using ListeDeNaissance.Core.UseCases;
 
 namespace Infra
 {
@@ -10,18 +13,17 @@ namespace Infra
     {
         public static IServiceCollection AddMyInfrastructureServices(this IServiceCollection services)
         {
-            // --- BLOC A : Comptes & Authentification ---
             services.AddTransient<ICompteRepository, CompteRepository>();
             services.AddTransient<ICompteGateway, CompteGateway>();
 
-            // --- BLOC B : Gestion des Listes de Naissance ---
             services.AddTransient<IListeDeNaissanceRepository, ListeDeNaissanceRepository>();
             services.AddTransient<IListeDeNaissanceGateway, ListeDeNaissanceGateway>();
-
-            // --- BLOC C : Gestion des Articles ---
+            
+            services.AddTransient<IModelDeListeRepository, ModelDeListeRepository>();
+            services.AddTransient<IModelDeListeGateway, ModelDeListeGateway>();
+            
             services.AddTransient<IArticleRepository, ArticleRepository>();
             services.AddTransient<IArticleGateway, ArticleGateway>(); 
-
             return services;
         }
     }

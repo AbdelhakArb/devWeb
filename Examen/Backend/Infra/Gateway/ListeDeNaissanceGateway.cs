@@ -1,12 +1,9 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ListeDeNaissance.Core.IGateways;
-using CoreModels = ListeDeNaissance.Core.Models;
 using Infra.Repositories.Abstractions;
-using Infra.Models;
 
-namespace Infra.Gateway
+namespace Infra.Gateways
 {
     public class ListeDeNaissanceGateway : IListeDeNaissanceGateway
     {
@@ -17,95 +14,89 @@ namespace Infra.Gateway
             _repository = repository;
         }
 
-        // 1. MÉTHODE CRÉATION (Le nom dans ton interface semble être AddListeDeNaissanceAsync)
-        public async Task AddListeDeNaissanceAsync(CoreModels.ListeDeNaissance liste)
+        public async Task<IEnumerable<ListeDeNaissance.Core.Models.ListeDeNaissance>> GetAllAsync()
         {
-            var infraListe = new Models.ListeDeNaissance
-            {
-                IdListeDeNaissance = liste.ListeDeNaissanceId,
-                CompteParentId = liste.CompteParentId,
-                NomListeDeNaissance = liste.NomListeDeNaissance,
-                StatusListe = "Actif"
-            };
-            await _repository.InsertAsync(infraListe);
+            return await _repository.GetAllAsync();
         }
 
-        // 2. MÉTHODE AJOUTER (Renommée pour correspondre à Enregistrer si besoin)
-        public async Task EnregistrerListeAsync(CoreModels.ListeDeNaissance liste)
+        public async Task<ListeDeNaissance.Core.Models.ListeDeNaissance?> AfficherListeParIdAsync(int id)
         {
-            await AddListeDeNaissanceAsync(liste);
+            return await _repository.GetByIdAsync(id);
         }
 
-        // =========================================================================
-        // AUTRES MAPPINGS (Identiques à ton code)
-        // =========================================================================
-
-        public async Task<IEnumerable<CoreModels.ListeDeNaissance>> ObtenirToutesLesListesAsync()
+        public async Task<IEnumerable<ListeDeNaissance.Core.Models.ListeDeNaissance>> ObtenirListesParParentIdAsync(int parentId)
         {
-            var infraListes = await _repository.GetAllAsync();
-            return infraListes.Select(l => new CoreModels.ListeDeNaissance
-            {
-                ListeDeNaissanceId = l.IdListeDeNaissance,
-                CompteParentId = l.CompteParentId,
-                NomListeDeNaissance = l.NomListeDeNaissance
-            });
+            return await _repository.GetByParentIdAsync(parentId);
         }
 
-        public async Task<CoreModels.ListeDeNaissance?> ObtenirListeParIdAsync(int id)
+        public async Task InsertAsync(ListeDeNaissance.Core.Models.ListeDeNaissance liste)
         {
-            var l = await _repository.GetByIdAsync(id);
-            if (l == null) return null;
-
-            return new CoreModels.ListeDeNaissance
-            {
-                ListeDeNaissanceId = l.IdListeDeNaissance,
-                CompteParentId = l.CompteParentId,
-                NomListeDeNaissance = l.NomListeDeNaissance
-            };
+            await _repository.InsertAsync(liste);
         }
 
-        public async Task<IEnumerable<CoreModels.ListeDeNaissance>> ObtenirListesParParentIdAsync(int parentId)
+        public async Task UpdateAsync(ListeDeNaissance.Core.Models.ListeDeNaissance liste)
         {
-            var infraListes = await _repository.GetByParentIdAsync(parentId);
-            return infraListes.Select(l => new CoreModels.ListeDeNaissance
-            {
-                ListeDeNaissanceId = l.IdListeDeNaissance,
-                CompteParentId = l.CompteParentId,
-                NomListeDeNaissance = l.NomListeDeNaissance
-            });
+            await _repository.UpdateAsync(liste);
         }
 
-        public async Task ModifierListeAsync(CoreModels.ListeDeNaissance liste)
-        {
-            var infraListe = new Models.ListeDeNaissance
-            {
-                IdListeDeNaissance = liste.ListeDeNaissanceId,
-                CompteParentId = liste.CompteParentId,
-                NomListeDeNaissance = liste.NomListeDeNaissance
-            };
-            await _repository.UpdateAsync(infraListe);
-        }
-
-        public async Task SupprimerListeAsync(int id)
+        public async Task DeleteAsync(int id)
         {
             await _repository.DeleteAsync(id);
         }
 
-        public async Task AjouterArticleDansListeAsync(CoreModels.PresenceArticleDansListe presenceArticle)
+        public async Task AjouterArticleDansListeAsync(int listeId, int articleId, int quantite)
         {
-            await _repository.AjouterArticleDansListeAsync(presenceArticle.ListeDeNaissanceId, presenceArticle.ArticleId, presenceArticle.QtySouhaitee);
+            await _repository.AjouterArticleDansListeAsync(listeId, articleId, quantite);
         }
 
-        public async Task<IEnumerable<CoreModels.PresenceArticleDansListe>> GetArticlesPourReservationAsync(int listeId)
+        public async Task MettreAJourQuantiteArticleAsync(int listeId, int articleId, int nouvelleQuantite)
         {
-            var infraArticles = await _repository.GetArticlesPourReservationRepoAsync(listeId);
+            await _repository.MettreAJourQuantiteArticleAsync(listeId, articleId, nouvelleQuantite);
+        }
 
-            return infraArticles.Select(a => new CoreModels.PresenceArticleDansListe
+        public async Task<IEnumerable<ListeDeNaissance.Core.Models.PresenceArticleDansListe>> GetArticlesPourReservationRepoAsync(int listeId)
+        {
+            return await _repository.GetArticlesPourReservationRepoAsync(listeId);
+        }
+
+        public async Task<IEnumerable<ListeDeNaissance.Core.Models.Article>> ObtenirArticlesParListeIdAsync(int listeId)
+        {
+            var infraArticles = await _repository.ObtenirArticlesParListeIdAsync(listeId);
+            var coreArticles = new List<ListeDeNaissance.Core.Models.Article>();
+
+            foreach (var item in infraArticles)
             {
-                ListeDeNaissanceId = a.ListeDeNaissanceId,
-                ArticleId = a.ArticleId,
-                QtySouhaitee = a.QtySouhaitee
-            });
+                coreArticles.Add(new ListeDeNaissance.Core.Models.Article
+                {
+                    ArticleId = item.ArticleId,
+                    ArticleNom = item.ArticleNom,
+                    ArticleDesc = item.ArticleDesc,
+                    ArticlePrix = item.ArticlePrix,
+                    ArticleQty = item.ArticleQty
+                });
+            }
+
+            return coreArticles;
+        }
+
+        public async Task<IEnumerable<ListeDeNaissance.Core.Models.Article>> ObtenirCatalogueArticlesAsync()
+        {
+            var infraArticles = await _repository.ObtenirCatalogueArticlesAsync();
+            var coreArticles = new List<ListeDeNaissance.Core.Models.Article>();
+
+            foreach (var item in infraArticles)
+            {
+                coreArticles.Add(new ListeDeNaissance.Core.Models.Article
+                {
+                    ArticleId = item.ArticleId,
+                    ArticleNom = item.ArticleNom,
+                    ArticleDesc = item.ArticleDesc,
+                    ArticlePrix = item.ArticlePrix,
+                    ArticleQty = item.ArticleQty
+                });
+            }
+
+            return coreArticles;
         }
 
         public async Task<int> IncrementerQuantiteArticleAsync(int listeId, int articleId)
@@ -117,19 +108,26 @@ namespace Infra.Gateway
         {
             return await _repository.DecrementerQuantiteArticleRepoAsync(listeId, articleId);
         }
-
-        // Dans ta classe ListeDeNaissanceGateway :
-        public async Task<bool> SoumettreReservationsAsync(IEnumerable<CoreModels.PresenceArticleDansListe> panier)
+        /*
+        public async Task<bool> SoumettreReservationsAsync(IEnumerable<ListeDeNaissance.Core.Models.ReservationRequestItem> panier)
         {
-            // Mapping du modèle Core vers le modèle Infra (SOLID - Séparation des préoccupations)
-            var infraPanier = panier.Select(item => new Infra.Models.PresenceArticleDansListe
-            {
-                ListeDeNaissanceId = item.ListeDeNaissanceId,
-                ArticleId = item.ArticleId,
-                QtySouhaitee = item.QtySouhaitee
-            });
+            return await _repository.SoumettreReservationsRepoAsync(panier);
+        }*/
 
-            return await _repository.SoumettreReservationsRepoAsync(infraPanier);
+        public async Task<bool> SoumettreReservationsAsync(IEnumerable<ListeDeNaissance.Core.Models.ReservationRequestItem> panier)
+        {
+            Console.WriteLine("gateway lance");
+            return await _repository.SoumettreReservationsRepoAsync(panier);
+        }
+
+        public async Task EnregistrerConsultationAsync(int listeId, int visiteurId)
+        {
+            await _repository.EnregistrerConsultationRepoAsync(listeId, visiteurId);
+        }
+
+        public async Task CloturerListeAsync(int listeId, string statusListe)
+        {
+            await _repository.CloturerListeRepoAsync(listeId, statusListe);
         }
     }
 }

@@ -1,16 +1,38 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using ListeDeNaissance.Core.UseCases.Abstractions;
 using CoreModels = ListeDeNaissance.Core.Models;
-using System;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.EndPoints
 {
-    // --- LES DTOS POUR FAIRE PLAISIR AU PROF ---
-    public record CreerListeDto(int CompteParentId, string NomListeDeNaissance);
-    public record AjouterArticleDto(int ListeDeNaissanceId, int ArticleId, int QtySouhaitee);
+    public record SoumettreReservationDto(
+        [property: JsonPropertyName("listeDeNaissanceId")] int ListeDeNaissanceId,
+        [property: JsonPropertyName("articleId")] int ArticleId,
+        [property: JsonPropertyName("qtySouhaitee")] int QtySouhaitee,
+        [property: JsonPropertyName("visiteurId")] int VisiteurId,
+        [property: JsonPropertyName("messageText")] string? MessageText,
+        [property: JsonPropertyName("signatureMessage")] string? SignatureMessage
+    );
+
+    public record AjouterArticleDto(
+        [property: JsonPropertyName("articleId")] int ArticleId,
+        [property: JsonPropertyName("quantite")] int QtySouhaitee
+    );
+
+    public record ModifierQuantiteDto(
+        [property: JsonPropertyName("articleId")] int ArticleId
+    );
+
+    public record ConsultationDto(
+        [property: JsonPropertyName("visiteurId")] int VisiteurId
+    );
+
+    public record CloturerListeDto(
+        [property: JsonPropertyName("statusListe")] string StatusListe
+    );
 
     public static class ListeDeNaissanceRoutes
     {
@@ -19,116 +41,88 @@ namespace Api.EndPoints
             var group = app.MapGroup("/api/listenaissance")
                            .WithTags("ListeDeNaissance");
 
-
-            group.MapPost("", async (
-                [FromBody] CreerListeDto dto,
-                [FromServices] ICreerListeDeNaissanceUseCase useCase) =>
+            group.MapGet("/", async (IAfficherListesParentParParentIdUseCase useCase, int parentId) =>
             {
-                if (dto == null || string.IsNullOrWhiteSpace(dto.NomListeDeNaissance))
-                {
-                    return Results.BadRequest("Données de liste invalides.");
-                }
-
-                var nouvelleListe = new CoreModels.ListeDeNaissance
-                {
-                    CompteParentId = dto.CompteParentId,
-                    NomListeDeNaissance = dto.NomListeDeNaissance
-                };
-
-                await useCase.ExecuterAsync(nouvelleListe);
-                return Results.Ok(nouvelleListe);
+                var listes = await useCase.ExecuterAsync(parentId);
+                return Results.Ok(listes);
             });
 
-            // --- 2. AJOUTER UN ARTICLE DANS UNE LISTE ---
-            group.MapPost("/article", async (
-                [FromBody] AjouterArticleDto dto,
-                [FromServices] IAjouterArticleDansListeUseCase useCase) =>
+            group.MapGet("/parent/{parentId:int}", async (IAfficherListesParentParParentIdUseCase useCase, int parentId) =>
             {
-                if (dto == null || dto.ListeDeNaissanceId <= 0 || dto.ArticleId <= 0 || dto.QtySouhaitee <= 0)
-                {
-                    return Results.BadRequest("Les données fournies sont invalides (ID ou quantité incorrects).");
-                }
-
-                var presenceArticle = new CoreModels.PresenceArticleDansListe
-                {
-                    ListeDeNaissanceId = dto.ListeDeNaissanceId,
-                    ArticleId = dto.ArticleId,
-                    QtySouhaitee = dto.QtySouhaitee
-                };
-
-                await useCase.ExecuterAsync(presenceArticle);
-                return Results.Ok(new { message = "L'article a bien été ajouté à la liste de naissance !" });
+                var listes = await useCase.ExecuterAsync(parentId);
+                return Results.Ok(listes);
             });
 
-            // --- 3. RÉCUPÉRER LES ARTICLES POUR RÉSERVATION ---
-            group.MapGet("/{listeId:int}/articles", async (
-                int listeId,
-                [FromServices] IObtenirArticlesListeUseCase useCase) =>
+            group.MapGet("/{id:int}", async (IAfficherListeParIdUseCase useCase, int id) =>
             {
-                var articles = await useCase.ExecuterAsync(listeId);
+                var liste = await useCase.ExecuterAsync(id);
+                return liste is not null ? Results.Ok(liste) : Results.NotFound();
+            });
+
+            group.MapGet("/{id:int}/articles", async (IObtenirArticlesListeUseCase useCase, int id) =>
+            {
+                var articles = await useCase.ExecuterAsync(id);
                 return Results.Ok(articles);
             });
 
-            // --- 4. INCREMENTER QUANTITÉ ---
-            group.MapPut("/{listeId:int}/articles/{articleId:int}/increment", async (
-                int listeId,
-                int articleId,
-                [FromServices] IIncrementerArticleListeUseCase useCase) =>
+            group.MapPost("/", async (ICreerListeDeNaissanceUseCase useCase, CoreModels.ListeDeNaissance liste) =>
             {
-                try
-                {
-                    int nouvelleQty = await useCase.ExecuterAsync(listeId, articleId);
-                    return Results.Ok(new
-                    {
-                        message = "Quantité incrémentée avec succès !",
-                        nouvelleQtySouhaitee = nouvelleQty
-                    });
-                }
-                catch (Exception)
-                {
-                    return Results.BadRequest("Impossible d'incrémenter l'article. Vérifiez les ID ou les stocks.");
-                }
+                await useCase.ExecuterAsync(liste);
+                return Results.Created($"/api/listenaissance/{liste.ListeDeNaissanceId}", liste);
             });
 
-            // --- 5. DÉCRÉMENTER QUANTITÉ ---
-            group.MapPut("/{listeId:int}/articles/{articleId:int}/decrement", async (
-                int listeId,
-                int articleId,
-                [FromServices] IDecrementerArticleListeUseCase useCase) =>
+            group.MapPost("/{id:int}/articles", async (IAjouterArticleDansListeUseCase useCase, int id, AjouterArticleDto dto) =>
             {
-                try
-                {
-                    int nouvelleQty = await useCase.ExecuterAsync(listeId, articleId);
-
-                    return Results.Ok(new
-                    {
-                        message = nouvelleQty == 0 ? "L'article a été retiré de la liste." : "Quantité décrémentée avec succès !",
-                        nouvelleQtySouhaitee = nouvelleQty
-                    });
-                }
-                catch (Exception)
-                {
-                    return Results.BadRequest("Impossible de décrémenter l'article. Vérifiez que l'article existe bien dans la liste.");
-                }
+                await useCase.ExecuterAsync(id, dto.ArticleId, dto.QtySouhaitee);
+                return Results.Ok();
             });
 
-           // --- 6. SOUMETTRE LE PANIER DE RÉSERVATION VISITEUR ---
-group.MapPost("/reserver", async (
-    [FromBody] dynamic panier, // Utilise 'dynamic' pour ignorer la vérification de type statique
-    [FromServices] ISoumettreReservationsUseCase useCase) =>
-{
-    try
-    {
-        // On passe les articles dynamiquement
-        await useCase.ExecuterAsync((IEnumerable<ListeDeNaissance.Core.Models.PresenceArticleDansListe>)panier.Articles); 
-        
-        return Results.Ok(new { message = "Réservations enregistrées avec succès !" });
-    }
-    catch (Exception ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
+            group.MapPost("/{id:int}/articles/incrementer", async (IAjouterArticleDansListeUseCase useCase, int id, ModifierQuantiteDto dto) =>
+            {
+                await useCase.ExecuterAsync(id, dto.ArticleId, 1);
+                return Results.Ok();
+            });
+
+            group.MapPost("/{id:int}/articles/decrementer", async (IAjouterArticleDansListeUseCase useCase, int id, ModifierQuantiteDto dto) =>
+            {
+                await useCase.ExecuterAsync(id, dto.ArticleId, -1);
+                return Results.Ok();
+            });
+
+            group.MapPost("/{id:int}/consultation", async (IEnregistrerConsultationUseCase useCase, int id, ConsultationDto dto) =>
+            {
+                await useCase.ExecuterAsync(id, dto.VisiteurId);
+                return Results.Ok();
+            });
+
+            group.MapPut("/{id:int}/cloturer", async (ICloturerListeUseCase useCase, int id, CloturerListeDto dto) =>
+             {
+                 await useCase.ExecuterAsync(id, dto.StatusListe);
+                 return Results.Ok();
+             });
+
+
+
+            group.MapPost("/reserver", async (ISoumettreReservationsUseCase useCase, [FromBody] IEnumerable<SoumettreReservationDto> panier) =>
+            {
+                var modelPanier = new List<CoreModels.ReservationRequestItem>();
+
+                foreach (var p in panier)
+                {
+                    modelPanier.Add(new CoreModels.ReservationRequestItem
+                    {
+                        ListeDeNaissanceId = p.ListeDeNaissanceId,
+                        ArticleId = p.ArticleId,
+                        QtySouhaitee = p.QtySouhaitee,
+                        VisiteurId = p.VisiteurId,
+                        MessageText = p.MessageText,
+                        SignatureMessage = p.SignatureMessage
+                    });
+                }
+
+                var success = await useCase.ExecuterAsync(modelPanier);
+                return success ? Results.Ok(true) : Results.BadRequest(false);
+            });
         }
     }
 }

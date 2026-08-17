@@ -7,9 +7,10 @@
   </div>
 
   <div class="actions-grid">
-    <button routerLink="/creer-liste" class="btn-action green">Créer Votre Liste</button>
-    <button routerLink="/visiteur" class="btn-action blue">Offrir un Cadeau</button>
-    <button routerLink="/gestion-liste" class="btn-action yellow">Gérer Votre Liste</button>
-    <button class="btn-action gray">Voir Modèles</button>
+    <!-- On affiche tout le monde, et on gère la sécurité au clic -->
+    <button (click)="accederAction('/creer-liste', 'Parent')" class="btn-action green">Créer Votre Liste</button>
+    <button (click)="accederAction('/gestion-liste', 'Parent')" class="btn-action yellow">Gérer Votre Liste</button>
+    <button (click)="accederAction('/visiteur', 'Visiteur')" class="btn-action blue">Offrir un Cadeau</button>
+    <button routerLink="/modeles" class="btn-action gray">Voir Modèles</button>
   </div>
 </div>

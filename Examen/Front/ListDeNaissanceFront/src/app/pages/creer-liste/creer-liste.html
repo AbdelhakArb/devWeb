@@ -2,15 +2,15 @@
   <h2>Créer une nouvelle liste de naissance</h2>
   <p class="subtitle">Remplissez les informations ci-dessous pour démarrer votre liste.</p>
 
-  @if (messageSucces) {
+  @if (messageSucces()) {
     <div class="alert success">
-      {{ messageSucces }}
+      {{ messageSucces() }}
     </div>
   }
 
-  @if (messageErreur) {
+  @if (messageErreur()) {
     <div class="alert error">
-      {{ messageErreur }}
+      {{ messageErreur() }}
     </div>
   }
 
@@ -22,19 +22,22 @@
         type="text" 
         id="nomListe" 
         name="nomListe" 
-        [(ngModel)]="nomListe" 
+        [ngModel]="nomListe()" 
+        (ngModelChange)="nomListe.set($event)"
         placeholder="Ex: Pour l'arrivée de notre bébé" 
         required
       >
     </div>
 
     <div class="form-group">
-      <label for="dateAccouchement">Date prévue d'accouchement (Optionnel) :</label>
+      <label for="dateAccouchement">Date prévue d'accouchement :</label>
       <input 
         type="date" 
         id="dateAccouchement" 
         name="dateAccouchement" 
-        [(ngModel)]="dateAccouchement"
+        [ngModel]="dateAccouchement()"
+        (ngModelChange)="dateAccouchement.set($event)"
+        required
       >
     </div>
 
@@ -44,17 +47,18 @@
         type="text" 
         id="lieu" 
         name="lieu" 
-        [(ngModel)]="lieu"
+        [ngModel]="lieu()"
+        (ngModelChange)="lieu.set($event)"
         placeholder="Ex: Hôpital Civil"
       >
     </div>
 
     <button 
       type="submit" 
-      [disabled]="!listeForm.form.valid || isSubmitting" 
+      [disabled]="!listeForm.form.valid || isSubmitting()" 
       class="btn-submit"
     >
-      @if (isSubmitting) {
+      @if (isSubmitting()) {
         Création en cours...
       } @else {
         Créer ma liste

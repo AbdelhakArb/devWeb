@@ -1,0 +1,33 @@
+<div class="container">
+  <h2>Mes Listes de Naissance</h2>
+
+  @if (isLoading()) {
+    <p class="loading">Chargement de vos listes...</p>
+  } @else if (errorMessage()) {
+    <p class="error">{{ errorMessage() }}</p>
+  } @else {
+    @if (listes().length === 0) {
+      <div class="empty-state">
+        <p>Vous n'avez pas encore de liste de naissance active.</p>
+        <button routerLink="/creer-liste" class="btn-primary">Créer une liste</button>
+      </div>
+    } @else {
+      <div class="listes-grid">
+        @for (liste of listes(); track liste.listeDeNaissanceId) {
+          <div class="card-liste" (click)="selectionnerListe(liste.listeDeNaissanceId)">
+            <h3>{{ liste.nomListeDeNaissance || 'Liste de Naissance' }}</h3>
+            <h3>Numero de liste : {{ liste.listeDeNaissanceId }}</h3>
+            <p>Date prévue : {{ liste.datePrevuPourAccouchement | date:'dd/MM/yyyy' }}</p>
+            <p>Statut : <span [class.cloturee]="liste.statusListe === 'Cloturee'">{{ liste.statusListe }}</span></p>
+
+            @if (liste.statusListe === 'Cloturee') {
+              <button type="button" disabled class="btn-disabled">Clôturée</button>
+            } @else {
+              <button type="button" [routerLink]="['/gestion-liste', liste.listeDeNaissanceId]">Gérer cette liste</button>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

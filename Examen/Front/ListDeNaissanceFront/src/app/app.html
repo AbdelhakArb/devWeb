@@ -1,1 +1,24 @@
+<nav>
+  <a routerLink="/accueil">Accueil</a>
+  <p>Debug utilisateur: {{ authService.utilisateurConnecte() | json }}</p>
+  @if (authService.estAuthentifie()) {
+    @if (authService.utilisateurConnecte()?.type === 'Parent') {
+      <a routerLink="/creer-liste">Créer ma Liste</a>
+      <a routerLink="/gerer-liste">Gérer ma Liste</a>
+    } @else {
+      <a routerLink="/offrir-cadeau">Offrir un Cadeau</a>
+    }
+    <button (click)="authService.deconnexion()">Déconnexion</button>
+  }
+</nav>
+
+<div class="boutons-accueil">
+  @if (authService.estAuthentifie()) {
+    @if (authService.utilisateurConnecte()?.type === 'Parent') {
+      <button routerLink="/gerer-liste">Gérer Votre Liste</button>
+    } @else {
+      <button routerLink="/offrir-cadeau">Offrir un Cadeau</button>
+    }
+  }
+</div>
 <router-outlet></router-outlet>

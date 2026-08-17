@@ -1,10 +1,8 @@
-import { Component } from '@angular/core'; 
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ListeNaissanceService } from '../../services/api/liste-naissance';
-import { ListeDeNaissance } from '../../services/api/models/liste-naissance';
-import { AuthService } from '../../services/auth'; 
 
 @Component({
   selector: 'app-creer-liste',
@@ -13,50 +11,89 @@ import { AuthService } from '../../services/auth';
   templateUrl: './creer-liste.html',
   styleUrl: './creer-liste.css',
 })
-export class CreerListe { 
-  nomListe: string = '';
-  dateAccouchement: string = '';
-  lieu: string = '';
+export class CreerListeComponent implements OnInit {
+  private readonly listeService = inject(ListeNaissanceService);
+  private readonly router = inject(Router);
 
-  messageSucces: string = '';
-  messageErreur: string = '';
-  isSubmitting: boolean = false; 
+  readonly nomListe = signal<string>('');
+  readonly dateAccouchement = signal<string>('');
+  readonly lieu = signal<string>('');
+  readonly messageErreur = signal<string>('');
+  readonly messageSucces = signal<string>('');
+  readonly isSubmitting = signal<boolean>(false);
+  
+  private articlesInitiaux: any[] = [];
 
-  constructor(
-    private listeService: ListeNaissanceService,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  ngOnInit(): void {
+    const currentState = history.state;
 
-  onSubmit() {
-    if (!this.nomListe.trim()) {
-      this.messageErreur = "Le nom de la liste est obligatoire.";
+    if (currentState) {
+      if (currentState['titreModele']) {
+        this.nomListe.set(currentState['titreModele']);
+      }
+      if (currentState['descriptionModele'] && !this.lieu()) {
+        this.lieu.set(currentState['descriptionModele']);
+      }
+      if (currentState['articlesInitiaux']) {
+        this.articlesInitiaux = currentState['articlesInitiaux'];
+      }
+    }
+  }
+
+  onSubmit(): void {
+    this.creerListe();
+  }
+
+  creerListe(): void {
+    this.isSubmitting.set(true);
+    this.messageErreur.set('');
+    
+    // Correction : Récupération dynamique de l'ID du parent connecté (ex: '25')
+    const storedUserId = localStorage.getItem('userId') ?? localStorage.getItem('id') ?? localStorage.getItem('compteParentId');
+    const parentId = Number(storedUserId ?? '25');
+
+    const dto = {
+      compteParentId: parentId,
+      nomListeDeNaissance: this.nomListe(),
+      datePrevuPourAccouchement: this.dateAccouchement(),
+      lieuListe: this.lieu()
+    };
+
+    this.listeService.creerListe(dto).subscribe({
+      next: (response: any) => {
+        this.messageSucces.set('Liste de naissance créée avec succès !');
+        const nouvelleListeId = response?.idListeDeNaissance ?? response?.id;
+        
+        if (this.articlesInitiaux.length > 0 && nouvelleListeId) {
+          this.ajouterArticlesAuModele(nouvelleListeId, 0);
+        } else {
+          setTimeout(() => this.router.navigate(['/mes-listes']), 1000);
+        }
+      },
+      error: () => {
+        this.isSubmitting.set(false);
+        this.messageErreur.set('Une erreur est survenue lors de la création.');
+      }
+    });
+  }
+
+  private ajouterArticlesAuModele(listeId: number, index: number): void {
+    if (index >= this.articlesInitiaux.length) {
+      this.isSubmitting.set(false);
+      this.router.navigate(['/mes-listes']);
       return;
     }
 
-    this.isSubmitting = true;
-    this.messageErreur = '';
+    const article = this.articlesInitiaux[index];
+    const articleId = article.articleId ?? article.id;
+    const quantite = article.qtySouhaitee ?? article.quantite ?? 1;
 
-    const parentIdConnecte = this.authService.utilisateurConnecte()?.id;
-
-    const nouvelleListe: ListeDeNaissance = {
-      compteParentId: parentIdConnecte || 1,
-      nomListeDeNaissance: this.nomListe,
-      datePrevuPourAccouchement: this.dateAccouchement ? new Date(this.dateAccouchement) : undefined,
-      lieuListe: this.lieu.trim() || undefined,
-      statusListe: 'Active'
-    };
-
-    this.listeService.creerListe(nouvelleListe).subscribe({
-      next: (response: any) => {
-        this.messageSucces = "Liste créée ! Redirection vers la gestion de votre liste...";
-        setTimeout(() => {
-          this.router.navigate(['/gestion-liste']);
-        }, 2000);
+    this.listeService.ajouterArticleDansListe(listeId, articleId, quantite).subscribe({
+      next: () => {
+        this.ajouterArticlesAuModele(listeId, index + 1);
       },
-      error: (err: any) => {
-        this.messageErreur = err.error?.message || "Une erreur est survenue lors de la création.";
-        this.isSubmitting = false;
+      error: () => {
+        this.ajouterArticlesAuModele(listeId, index + 1);
       }
     });
   }

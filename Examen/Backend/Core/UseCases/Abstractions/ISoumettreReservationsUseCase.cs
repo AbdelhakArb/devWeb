@@ -6,6 +6,6 @@ namespace ListeDeNaissance.Core.UseCases.Abstractions
 {
     public interface ISoumettreReservationsUseCase
     {
-        Task<bool> ExecuterAsync(IEnumerable<PresenceArticleDansListe> panier);
+        Task<bool> ExecuterAsync(IEnumerable<ReservationRequestItem> panier);
     }
 }

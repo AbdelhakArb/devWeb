@@ -1,44 +1,48 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ListeDeNaissance } from './models/liste-naissance';
-import { Article } from './models/article';
+import { Article } from '../../services/api/models/article';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ListeNaissanceService {
-  private apiUrl = 'http://localhost:5141/api/listenaissance';
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = 'http://localhost:5141/api/listenaissance';
 
-  constructor(private http: HttpClient) {}
-
-  // 1. Créer une liste
-  creerListe(liste: ListeDeNaissance): Observable<any> {
-    return this.http.post<any>(this.apiUrl, liste);
+  creerListe(data: any): Observable<any> {
+    return this.http.post(this.baseUrl, data);
   }
 
-  // 2. Obtenir les listes d'un parent
-  obtenirListesParParent(parentId: number): Observable<ListeDeNaissance[]> {
-    return this.http.get<ListeDeNaissance[]>(`${this.apiUrl}/parent/${parentId}`);
+  chargerListeParId(id: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/${id}`);
   }
 
-  // 3. Charger une liste par son ID unique (Visiteur)
-  chargerListeParId(id: number): Observable<ListeDeNaissance> {
-    return this.http.get<ListeDeNaissance>(`${this.apiUrl}/${id}`);
+  obtenirArticlesDeLaListe(listeId: number): Observable<Article[]> {
+    return this.http.get<Article[]>(`${this.baseUrl}/${listeId}/articles`);
   }
 
-  // 4. Charger les articles d'une liste spécifique
-  chargerArticlesDeLaListe(listeId: number): Observable<Article[]> {
-    return this.http.get<Article[]>(`${this.apiUrl}/${listeId}/articles`);
+  ajouterArticle(listeId: number, articleId: number, quantite: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/${listeId}/articles`, { articleId, quantite });
   }
 
-  // 5. Ajouter ou mettre à jour un article dans une liste (Parent)
   ajouterArticleDansListe(listeId: number, articleId: number, quantite: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${listeId}/articles`, { articleId, quantite });
+    return this.ajouterArticle(listeId, articleId, quantite);
   }
 
-  // 6. Réserver un article (Visiteur)
-  reserverArticle(listeId: number, articleId: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/${listeId}/articles/${articleId}/reserver`, {});
+  incrementerQuantite(listeId: number, articleId: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/${listeId}/articles/incrementer`, { articleId });
+  }
+
+  decrementerQuantite(listeId: number, articleId: number): Observable<any> {
+    return this.http.post(`${this.baseUrl}/${listeId}/articles/decrementer`, { articleId });
+  }
+
+  mettreAJourQuantiteArticle(listeId: number, articleId: number, delta: number): Observable<any> {
+    if (delta > 0) {
+      return this.incrementerQuantite(listeId, articleId);
+    } else {
+      return this.decrementerQuantite(listeId, articleId);
+    }
   }
 }

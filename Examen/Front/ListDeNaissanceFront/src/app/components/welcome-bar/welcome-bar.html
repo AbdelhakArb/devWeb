@@ -1,7 +1,16 @@
-@if (authService.estAuthentifie()) {
-  <div class="status-bar">
-    <a routerLink="/">Accueil</a> |
-    <span>Bienvenue {{ utilisateur()?.nom || 'Utilisateur' }} !</span>
-    <button (click)="deconnexion()">Déconnexion</button>
+<div class="welcome-bar">
+  <div class="nav-links">
+    <a routerLink="/accueil">Accueil</a>
+
+    @if (authService.estAuthentifie()) {
+      <span class="user-info">
+        Bonjour Cher {{ authService.utilisateurConnecte()?.prenom || 'Utilisateur' }} {{ authService.utilisateurConnecte()?.nom }} 
+        (Vous êtes connecté en tant que : <strong>{{ authService.utilisateurConnecte()?.role }}</strong>)
+      </span>
+      <button class="btn-deconnexion" (click)="authService.deconnexion()">Déconnexion</button>
+    } @else {
+      <a routerLink="/login">Connexion</a>
+      <a routerLink="/inscription">Inscription</a>
+    }
   </div>
-}
+</div>

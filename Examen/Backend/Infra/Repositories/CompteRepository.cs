@@ -49,21 +49,26 @@ namespace Infra.Repositories
 
         public async Task CreateCompteAsync(CompteParent parent)
         {
-            using var connection = GetConnection();
+            using var inscription = GetConnection();
 
             // Sécurité : Hachage du mot de passe avec BCrypt avant insertion
             string passwordHache = BCrypt.Net.BCrypt.HashPassword(parent.MotDePasseCompte);
 
             var sql = @"
-                INSERT INTO compteParent (EmailDeContact, MotDePasseCompte, NomPremierParent, PrenomPremierParent)
-                VALUES (@Email, @Password, @Nom, @Prenom);";
+                INSERT INTO compteParent (EmailDeContact, MotDePasseCompte, NomPremierParent, PrenomPremierParent, AdresseParent, CpParent, VilleParent, PaysParent)
+                VALUES (@Email, @Password, @Nom, @Prenom, @Adresse, @Cp, @Ville, @Pays);";
 
-            await connection.ExecuteAsync(sql, new
+            await inscription.ExecuteAsync(sql, new
             {
                 Email = parent.EmailDeContact,
                 Password = passwordHache,   
                 Nom = parent.NomPremierParent,     
-                Prenom = parent.PrenomPremierParent 
+                Prenom = parent.PrenomPremierParent,
+                Adresse = parent.AdresseParent,
+                Cp = parent.CpParent,
+                Ville = parent.VilleParent,
+                Pays = parent.PaysParent
+
             });
         }
 
@@ -97,7 +102,7 @@ namespace Infra.Repositories
 
         public async Task CreateVisiteurAsync(Visiteur visiteur)
         {
-            using var connection = GetConnection();
+            using var inscription = GetConnection();
 
             string passwordHache = BCrypt.Net.BCrypt.HashPassword(visiteur.VisiteurMdp);
 
@@ -105,7 +110,7 @@ namespace Infra.Repositories
                 INSERT INTO visiteur (VisiteurNom, VisiteurPrenom, VisiteurEmail, VisiteurMdp, VisiteurAdresse, VisiteurCP, VisiteurVille, VisiteurPays)
                 VALUES (@Nom, @Prenom, @Email, @Password, @Adresse, @CP, @Ville, @Pays);";
 
-            await connection.ExecuteAsync(sql, new
+            await inscription.ExecuteAsync(sql, new
             {
                 Nom = visiteur.VisiteurNom,
                 Prenom = visiteur.VisiteurPrenom,

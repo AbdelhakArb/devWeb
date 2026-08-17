@@ -1,25 +1,23 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ListeDeNaissance.Core.IGateways;
-using ListeDeNaissance.Core.UseCases.Abstractions;
 using ListeDeNaissance.Core.Models;
+using ListeDeNaissance.Core.UseCases.Abstractions;
 
 namespace ListeDeNaissance.Core.UseCases
 {
     public class ObtenirArticlesUseCase : IObtenirArticlesUseCase
     {
-        // 🛠️ Minuscule ici pour respecter les conventions C#
-        private readonly IArticleGateway _articleGateway;
+        private readonly IListeDeNaissanceGateway _gateway;
 
-        public ObtenirArticlesUseCase(IArticleGateway articleGateway)
+        public ObtenirArticlesUseCase(IListeDeNaissanceGateway gateway)
         {
-            _articleGateway = articleGateway;
+            _gateway = gateway;
         }
 
         public async Task<IEnumerable<Article>> ObtenirCatalogueArticlesAsync()
         {
-            return await _articleGateway.ObtenirCatalogueArticlesAsync();
+            return await _gateway.ObtenirCatalogueArticlesAsync();
         }
     }
 }

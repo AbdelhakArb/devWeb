@@ -1,116 +1,119 @@
-import { Component } from '@angular/core'; 
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { Article } from '../../services/api/models/article';
-import { ListeDeNaissance } from '../../services/api/models/liste-naissance';
 import { ListeNaissanceService } from '../../services/api/liste-naissance'; 
-import { AuthService } from '../../services/auth'; 
-import { Router } from '@angular/router';
+import { ListeReservationService } from '../../services/liste-reservation';
+import { ArticleService } from '../../services/article';
+import { CatalogueComponent } from '../catalogue/catalogue';
+import { PanierComponent } from '../../components/panier/panier';
+import { PanierItem } from '../../services/api/models/panier';
 
 @Component({
   selector: 'app-gestion-liste',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CatalogueComponent, PanierComponent],
   templateUrl: './gestion-liste.html',
   styleUrl: './gestion-liste.css'
 })
-export class GestionListe { 
-  
-  catalogueArticles: Article[] = [
-    { id: 1, nom: 'Poussette Trio Évolutive', prix: 349.99, categorie: 'Transport' },
-    { id: 2, nom: 'Lit à barreaux en bois', prix: 149.50, categorie: 'Chambre' },
-    { id: 3, nom: 'Biberon anti-colique 260ml', prix: 12.90, categorie: 'Repas' },
-    { id: 4, nom: 'Babyphone Caméra HD', prix: 89.99, categorie: 'Sécurité' },
-    { id: 5, nom: 'Tapis d’éveil sensoriel', prix: 45.00, categorie: 'Jouets' }
-  ];
+export class GestionListe implements OnInit {
+  private readonly listeService = inject(ListeNaissanceService);
+  private readonly route = inject(ActivatedRoute);
+  readonly resService = inject(ListeReservationService);
+  readonly articleService = inject(ArticleService);
 
-  maListeArticles: Article[] = [];
-  listeIdActuelle: number | null = null;
-  listeCloturee: boolean = false;
-  afficherMessageConfirmation: boolean = false;
+  readonly listeCloturee = signal<boolean>(false);
+  readonly listeIdActuelle = signal<number | null>(null);
+  readonly afficherModaleCloture = signal<boolean>(false);
 
-  constructor(
-    private listeService: ListeNaissanceService,
-    private authService: AuthService, 
-    private router: Router
-  ) {
-    // Chargement immédiat dans le constructeur
-    const parentId = this.authService.utilisateurConnecte()?.id;
-    if (parentId) {
-      this.listeService.obtenirListesParParent(parentId).subscribe({
-        next: (listes: ListeDeNaissance[]) => {
-          if (listes && listes.length > 0) {
-            this.listeIdActuelle = listes[0].listeDeNaissanceId || null;
-            this.listeCloturee = listes[0].statusListe === 'Cloturee';
-            
-            if (this.listeIdActuelle) {
-              this.chargerMaListe();
-            }
-          }
-        },
-        error: (err: any) => console.error("Erreur lors de la récupération des listes :", err)
-      });
-    }
-  }
-
-  chargerMaListe() {
-    if (!this.listeIdActuelle) return;
-
-    this.listeService.chargerArticlesDeLaListe(this.listeIdActuelle).subscribe({
-      next: (articlesDB: Article[]) => {
-        this.maListeArticles = articlesDB;
-      },
-      error: (err: any) => console.error("Erreur lors du chargement des articles :", err)
-    });
-  }
-
-  ajouterArticle(article: Article) {
-    if (this.listeCloturee) return;
-    if (!this.listeIdActuelle) return;
-
-    const articleExistant = this.maListeArticles.find(item => item.id === article.id);
-    if (articleExistant) {
-      articleExistant.articleQty = (articleExistant.articleQty || 0) + 1;
-    } else {
-      this.maListeArticles.push({ ...article, articleQty: 1 });
-    }
-
-    const quantiteAEnvoyer: number = (articleExistant ? articleExistant.articleQty : 1) || 1;
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.paramMap.get('id') || this.route.parent?.snapshot.paramMap.get('id');
     
-    this.listeService.ajouterArticleDansListe(this.listeIdActuelle!, article.id!, quantiteAEnvoyer).subscribe({
-      next: () => console.log('Article synchronisé en DB !'),
-      error: (err: any) => console.error('Erreur de synchro DB :', err)
+    if (idParam) {
+      const listeId = Number(idParam);
+      this.listeIdActuelle.set(listeId);
+      this.resService.chargerArticlesDeLaListe(listeId);
+    }
+  }
+ 
+
+
+
+  ajouterArticle(article: Article): void {
+    if (this.listeCloturee() || !this.listeIdActuelle()) return;
+    
+    const articleId = article.articleId ?? article.id;
+    if (!articleId) return;
+
+    this.listeService.ajouterArticleDansListe(this.listeIdActuelle()!, articleId, 1).subscribe({
+      next: () => {
+        this.resService.chargerArticlesDeLaListe(this.listeIdActuelle()!);
+      },
+      error: (err: any) => console.error('Erreur ajout article :', err)
     });
   }
 
-  retirerArticle(idArticle: number) {
-    if (this.listeCloturee) return;
+  modifierQuantite(item: any, delta: number): void {
+    const listeId = this.listeIdActuelle();
+    const articleId = item.articleId ?? item.id;
+    if (!listeId || !articleId) return;
 
-    const itemAModifier = this.maListeArticles.find(item => item.id === idArticle);
-    if (itemAModifier && itemAModifier.articleQty && itemAModifier.articleQty > 1) {
-      itemAModifier.articleQty--;
-    } else {
-      this.maListeArticles = this.maListeArticles.filter(item => item.id !== idArticle);
-    }
+    const action$ = delta > 0 
+      ? this.listeService.incrementerQuantite(listeId, articleId)
+      : this.listeService.decrementerQuantite(listeId, articleId);
+
+    action$.subscribe({
+      next: () => {
+        this.resService.chargerArticlesDeLaListe(listeId);
+        if (delta > 0) {
+          this.articleService.diminuerStock(articleId);
+        } else {
+          this.articleService.augmenterStock(articleId);
+        }
+      },
+      error: (err: any) => console.error("Erreur modification quantité :", err)
+    });
   }
 
-  cloturerLaListe() {
-    this.listeCloturee = true;
-    this.afficherMessageConfirmation = true;
+  panierItems(): PanierItem[] {
+    const items = this.resService.articlesDeLaListe();
+    
+    const mappedItems = items.map(item => {
+      const prix = Number(item.articlePrix) || 0;
+      const qty = Number(item.articleQty) || 1;
+      return {
+        articleId: item.articleId ?? item.id ?? 0,
+        articleNom: item.articleNom ?? '',
+        articlePrix: prix,
+        articleQty: qty,
+        soustotalArticles: prix * qty,
+        totalAPayer: 0
+      };
+    });
+
+    const total = mappedItems.reduce((acc, i) => acc + i.soustotalArticles, 0);
+    return mappedItems.map(i => ({ ...i, totalAPayer: total }));
   }
 
-  acheterLeReste() {
-    this.router.navigate(['/paiement']);
+  ouvrirCloture(): void {
+    this.afficherModaleCloture.set(true);
   }
 
-  get totalPrix(): number {
-    return this.maListeArticles.reduce((total, item) => total + (item.prix * (item.articleQty || 1)), 0);
+  fermerCloture(): void {
+    this.afficherModaleCloture.set(false);
   }
 
-  get totalQuantite(): number {
-    return this.maListeArticles.reduce((total, item) => total + (item.articleQty || 0), 0);
-  }
+  validerCloture(): void {
+    const listeId = this.listeIdActuelle();
+    if (!listeId) return;
 
-  get resteAPayer(): number {
-    return this.maListeArticles.reduce((total, item) => total + (item.prix * (item.articleQty || 1)), 0);
+    this.resService.cloturerListe(listeId, 'Cloturee').subscribe({
+      next: () => {
+        this.afficherModaleCloture.set(false);
+        this.listeCloturee.set(true);
+        this.resService.chargerArticlesDeLaListe(listeId);
+      },
+      error: (err) => console.error("Erreur clôture :", err)
+    });
   }
 }

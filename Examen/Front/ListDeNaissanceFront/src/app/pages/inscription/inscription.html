@@ -29,32 +29,47 @@
 
       <div class="form-group">
         <label for="nom">Nom</label>
-        <input type="text" id="nom" [value]="nom()" (input)="majChamp('nom', $event)" placeholder="Ex: Dupont" required>
+        <input type="text" id="nom" name="nom" [(ngModel)]="nom" placeholder="Ex: Dupont" required>
       </div>
 
       <div class="form-group">
         <label for="prenom">Prénom</label>
-        <input type="text" id="prenom" [value]="prenom()" (input)="majChamp('prenom', $event)" placeholder="Ex: Jean" required>
+        <input type="text" id="prenom" name="prenom" [(ngModel)]="prenom" placeholder="Ex: Jean" required>
       </div>
 
       <div class="form-group">
         <label for="email">Adresse Email</label>
-        <input type="email" id="email" [value]="email()" (input)="majChamp('email', $event)" placeholder="exemple@mail.com" required>
+        <input type="email" id="email" name="email" [(ngModel)]="email" placeholder="exemple@mail.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="adresse">Adresse</label>
+        <input type="text" id="adresse" name="adresse" [(ngModel)]="adresse" placeholder="Ex: 12 rue de la Paix">
+      </div>
+
+      <div class="form-group">
+        <label for="cp">Code Postal</label>
+        <input type="text" id="cp" name="cp" [(ngModel)]="cp" placeholder="Ex: 75001">
       </div>
 
       <div class="form-group">
         <label for="ville">Ville</label>
-        <input type="text" id="ville" [value]="ville()" (input)="majChamp('ville', $event)" placeholder="Ex: Paris">
+        <input type="text" id="ville" name="ville" [(ngModel)]="ville" placeholder="Ex: Paris">
+      </div>
+
+      <div class="form-group">
+        <label for="pays">Pays</label>
+        <input type="text" id="pays" name="pays" [(ngModel)]="pays" placeholder="Ex: France">
       </div>
 
       <div class="form-group">
         <label for="password">Mot de passe</label>
-        <input type="password" id="password" [value]="motDePasse()" (input)="majChamp('motDePasse', $event)" placeholder="********" required>
+        <input type="password" id="password" name="motDePasse" [(ngModel)]="motDePasse" placeholder="********" required>
       </div>
 
       <div class="form-group">
         <label for="confirmPassword">Confirmer le mot de passe</label>
-        <input type="password" id="confirmPassword" [value]="confirmationMdp()" (input)="majChamp('confirmationMdp', $event)" placeholder="********" required>
+        <input type="password" id="confirmPassword" name="confirmationMdp" [(ngModel)]="confirmationMdp" placeholder="********" required>
       </div>
 
       <button type="submit" class="btn-login" [disabled]="isSubmitting()">

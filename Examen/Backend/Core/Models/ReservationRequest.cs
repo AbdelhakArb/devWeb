@@ -1,13 +1,13 @@
-namespace ListeDeNaissance.Core.Models;
 
-public class PanierReservationDto
+namespace ListeDeNaissance.Core.Models
 {
-    public int VisiteurId { get; set; }
-    public List<LigneReservationDto> ListeReservations { get; set; } = new();
-}
-
-public class LigneReservationDto
-{
-    public int PresenceArticleListeId { get; set; }
-    public int QtyReserve { get; set; }
+    public class ReservationRequestItem
+    {
+        public int ListeDeNaissanceId { get; set; }
+        public int ArticleId { get; set; }
+        public int QtySouhaitee { get; set; }
+        public int VisiteurId { get; set; }
+        public string? MessageText { get; set; }
+        public string? SignatureMessage { get; set; }
+    }
 }

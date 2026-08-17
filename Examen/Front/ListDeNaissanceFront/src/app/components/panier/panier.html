@@ -1,0 +1,52 @@
+<div class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>{{ isParent() ? 'Confirmation de Clôture' : 'Confirmation de la Réservation' }}</h3>
+    </div>
+
+    <div class="modal-body">
+      <table class="table-cloture">
+        <thead>
+          <tr>
+            <th>Article</th>
+            <th>Quantité</th>
+            <th>Prix Unitaire</th>
+            <th>Sous-total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.articleId) {
+            <tr>
+              <td>{{ item.articleNom }}</td>
+              <td>{{ item.articleQty || 1 }}</td>
+              <td>{{ item.articlePrix || 0 }} €</td>
+              <td>{{ (item.articlePrix || 0) * (item.articleQty || 1) | number:'1.2-2' }} €</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (!isParent()) {
+        <div class="message-section" style="margin-top: 15px;">
+          <label for="messageInput">Laisser un message aux parents (optionnel) :</label>
+          <textarea id="messageInput" [(ngModel)]="message" placeholder="Votre message..."></textarea>
+        </div>
+
+        <div class="signature-section" style="margin-top: 10px;">
+          <label for="signatureInput">Signature :</label>
+          <input id="signatureInput" type="text" [(ngModel)]="signature" placeholder="Votre nom..." />
+        </div>
+      }
+
+      <div class="total-container" style="margin-top: 15px;">
+        <span>Total à payer :</span>
+        <span class="total-amount">{{ calculerTotal() | currency:'EUR' }}</span>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn-annuler" (click)="surAnnuler()">Annuler</button>
+      <button type="button" class="btn-confirmer" (click)="surConfirmer()">Confirmer et Payer</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<div class="catalogue-grid" style="display: flex; flex-direction: column; gap: 10px;">
+  @for (article of articleService.articles(); track article.articleId || article.id) {
+    <div class="catalogue-card" style="border: 1px solid #ddd; padding: 10px; border-radius: 5px;">
+      <h4>{{ article.articleNom || article.nom || 'Article sans nom' }}</h4>
+      <p>{{ article.articleDesc || article.description }}</p>
+      <p><strong>Prix :</strong> {{ article.articlePrix ?? article.prix ?? 0 }} €</p>
+      <p><strong>Quantité disponible :</strong> {{ article.articleQty ?? article.quantite ?? 0 }}</p>
+      <button type="button" (click)="onAjouter(article)" style="padding: 5px 10px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer;">
+        Ajouter
+      </button>
+    </div>
+  } @empty {
+    <p>Aucun article disponible dans le catalogue...</p>
+  }
+</div>

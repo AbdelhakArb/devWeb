@@ -1,35 +1,30 @@
-using Api.Middleware;
-using Infra;                        // Ton bon using pour l'infrastructure
-using ListeDeNaissance.Core;        // Ton bon using pour le Core
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using System;
+using Api.Middleware;
+using Infra;
+using ListeDeNaissance.Core;
 using ListeDeNaissance.API.Endpoints;
 using Api.EndPoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Enregistrement des services de ton application
+// 1. Enregistrement des services (TOUJOURS avant builder.Build())
 builder.Services.AddOpenApi();
-
-// =========================================================================
-// 🔌 CONNEXION DE TES SERVICES (100 % CORRIGÉ AVEC TES VRAIS NOMS)
-// =========================================================================
 builder.Services.AddMonAppliCoreServices(); 
 builder.Services.AddMyInfrastructureServices();
-
-#region Authentication and Authorization
-
 
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 });
 
-#endregion
-
-#region Configuration du CORS (Pour autoriser ton Angular)
-
+// Configuration du CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost",
@@ -41,30 +36,34 @@ builder.Services.AddCors(options =>
         });
 });
 
-#endregion
 builder.Services.AddAuthentication();
+
+// 2. Construction de l'application (Une seule fois, après les services)
 var app = builder.Build();
 
-// Gestionnaire global des erreurs
+// 3. Configuration du pipeline HTTP
+// Gestionnaire global des erreurs en tout premier
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>(); 
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.MapOpenApi();
-    app.UseCors("AllowLocalhost"); 
 }
 
 app.UseHttpsRedirection();
 
+// Activation du CORS
+app.UseCors("AllowLocalhost"); 
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-
-#region Endpoints (Routes de ton application Liste de Naissance)
-
-// On active uniquement TES routes d'authentification
-app.MapCompteRoutes(); 
-
+#region Endpoints
+app.MapCompteRoutes();
+app.AddArticleRoutes();
+app.MapListeDeNaissanceRoutes();
+app.MapModelDeListeRoutes();
 #endregion
 
 app.Run();

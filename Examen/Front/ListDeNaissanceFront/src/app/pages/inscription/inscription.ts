@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -12,60 +12,57 @@ import { AuthService } from '../../services/auth';
   styleUrl: '../login/login.css'
 })
 export class InscriptionComponent {
-  typeUtilisateur = signal<'parent' | 'visiteur'>('parent');
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
-  nom = signal<string>('');
-  prenom = signal<string>('');
-  email = signal<string>('');
-  ville = signal<string>('');
-  motDePasse = signal<string>('');
-  confirmationMdp = signal<string>('');
+  readonly typeUtilisateur = signal<'parent' | 'visiteur'>('parent');
+  
+  nom = '';
+  prenom = '';
+  email = '';
+  adresse = '';
+  cp = '';
+  ville = '';
+  pays = '';
+  motDePasse = '';
+  confirmationMdp = '';
 
-  messageErreur = signal<string>('');
-  messageSucces = signal<string>('');
-  isSubmitting = signal<boolean>(false);
+  readonly messageErreur = signal<string>('');
+  readonly messageSucces = signal<string>('');
+  readonly isSubmitting = signal<boolean>(false);
 
-  constructor(private authService: AuthService, private router: Router) {}
-
-  // Cette méthode remet en place le fonctionnement attendu par ton HTML
-  majChamp(champ: 'nom' | 'prenom' | 'email' | 'ville' | 'motDePasse' | 'confirmationMdp', event: Event) {
-    const valeur = (event.target as HTMLInputElement).value;
-    // On accède au signal via 'this[champ]' et on met à jour sa valeur
-    (this as any)[champ].set(valeur);
-  }
-
-  onInscription() {
-    if (this.motDePasse() !== this.confirmationMdp()) {
+  onInscription(): void {
+    if (this.motDePasse !== this.confirmationMdp) {
       this.messageErreur.set("Les mots de passe ne correspondent pas.");
       return;
     }
 
     this.isSubmitting.set(true);
     this.messageErreur.set('');
+    this.messageSucces.set('');
     
     const mode = this.typeUtilisateur();
-    const payload = mode === 'parent' ? {
-      nomPremierParent: this.nom(),
-      prenomPremierParent: this.prenom(),
-      emailDeContact: this.email(),
-      motDePasseCompte: this.motDePasse(),
-      villeParent: this.ville() || null
-    } : {
-      visiteurNom: this.nom(),
-      visiteurPrenom: this.prenom(),
-      visiteurEmail: this.email(),
-      visiteurMdp: this.motDePasse(),
-      visiteurVille: this.ville() || null
+    
+    const payload = {
+      nom: this.nom,
+      prenom: this.prenom,
+      email: this.email,
+      motDePasse: this.motDePasse,
+      adresse: this.adresse || null,
+      cp: this.cp || null,
+      ville: this.ville || null,
+      pays: this.pays || null
     };
 
-    this.authService.inscription(payload, mode).subscribe({
-      next: (reponse: any) => {
-        this.messageSucces.set(reponse.message || "Compte créé !");
-        setTimeout(() => this.router.navigate(['/login']), 2000);
+    this.authService.inscrireEtConnecter(payload, mode).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.messageSucces.set("Inscription et connexion réussies !");
+        setTimeout(() => this.router.navigate(['/']), 1500);
       },
       error: (err: any) => {
         this.isSubmitting.set(false);
-        this.messageErreur.set(err.error?.error || "Une erreur est survenue.");
+        this.messageErreur.set(err.error?.error || err.error?.message || "Erreur lors de l'inscription.");
       }
     });
   }

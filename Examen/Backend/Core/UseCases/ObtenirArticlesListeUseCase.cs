@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using ListeDeNaissance.Core.Models;
 using ListeDeNaissance.Core.IGateways;
 using ListeDeNaissance.Core.UseCases.Abstractions;
@@ -15,9 +16,13 @@ namespace ListeDeNaissance.Core.UseCases
             _listeGateway = listeGateway;
         }
 
-        public async Task<IEnumerable<PresenceArticleDansListe>> ExecuterAsync(int listeId)
+        public async Task<IEnumerable<Article>> ExecuterAsync(int listeId)
         {
-            return await _listeGateway.GetArticlesPourReservationAsync(listeId);
+            var articles = await _listeGateway.ObtenirArticlesParListeIdAsync(listeId);
+
+            System.Console.WriteLine($"[DEBUG USECASE] Liste ID {listeId} -> {articles?.Count() ?? 0} articles récupérés.");
+
+            return articles ?? Enumerable.Empty<Article>();
         }
     }
 }

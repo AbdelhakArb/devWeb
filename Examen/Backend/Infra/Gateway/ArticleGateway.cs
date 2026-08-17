@@ -17,16 +17,15 @@ namespace Infra.Gateway
             _articleRepository = articleRepository;
         }
 
-        // 1. Récupérer le catalogue complet via ton Repository Dapper
         public async Task<IEnumerable<ListeDeNaissance.Core.Models.Article>> ObtenirCatalogueArticlesAsync()  
         {
             var infraArticles = await _articleRepository.ObtenirTousLesArticlesAsync();
             return infraArticles.Select(a => new ListeDeNaissance.Core.Models.Article
             {
-                ArticleId = a.ArticleId,       
-                ArticleNom = a.ArticleNom,     
+                ArticleId = a.ArticleId,      
+                ArticleNom = a.ArticleNom,    
                 ArticleDesc = a.ArticleDesc,   
-                ArticleQty = a.ArticleQty,     
+                ArticleQty = a.ArticleQty,    
                 ArticlePrix = a.ArticlePrix,   
 
                 CategorieArticles = new List<ListeDeNaissance.Core.Models.CategorieArticle>(),
@@ -35,58 +34,55 @@ namespace Infra.Gateway
             });
         }
 
-        // 2. Obtenir un article par son ID
         public async Task<ListeDeNaissance.Core.Models.Article?> ObtenirParIdAsync(int articleId)
         {
-            return await Task.FromResult<ListeDeNaissance.Core.Models.Article?>(null);
+            var infraArticle = await _articleRepository.ObtenirArticleParIdAsync(articleId);
+            if (infraArticle == null) return null;
+
+            return new ListeDeNaissance.Core.Models.Article
+            {
+                ArticleId = infraArticle.ArticleId,
+                ArticleNom = infraArticle.ArticleNom,
+                ArticleDesc = infraArticle.ArticleDesc,
+                ArticleQty = infraArticle.ArticleQty,
+                ArticlePrix = infraArticle.ArticlePrix
+            };
         }
 
-        // 3. Ajouter l'article à la liste
         public async Task AjouterArticleALaListeAsync(ListeDeNaissance.Core.Models.PresenceArticleDansListe articleDansListe)
         {
             await Task.CompletedTask;
         }
 
-        // 4. Modifier la présence d'un article dans la liste
         public async Task ModifierArticleDansListeAsync(ListeDeNaissance.Core.Models.PresenceArticleDansListe articleDansListe)
         {
             await Task.CompletedTask;
         }
 
-        // 5. Retirer un article de la liste de naissance
         public async Task SupprimerArticleDeLaListeAsync(int presenceArticleId)
         {
             await Task.CompletedTask;
         }
 
-        // 6. Créer une réservation (CORRIGÉ : Reçoit bien une Reservation du Core !)
         public async Task CreerReservationAsync(ListeDeNaissance.Core.Models.Reservation reservation)
         {
-            // Si la réservation reçue est nulle, on évite le plantage
             if (reservation == null) return;
 
-            // 🛠️ MAPPING STRICT : Traduction du Core (reservation) vers l'Infra (infraReservation)
             var infraReservation = new Infra.Models.Reservation
             {
                 ReservationId = reservation.ReservationId,
                 PresenceArticleDansListeId = reservation.PresenceArticleDansListeId,
-                
-                // On va chercher la quantité dans 'QtyReserve' du Core pour la mettre dans l'Infra
                 QuantiteReservee = reservation.QtyReserve,
-                
-                 NomVisiteur = reservation.Visiteur?.VisiteurNom ?? "Invité Anonyme",
-                
+                NomVisiteur = reservation.Visiteur?.VisiteurNom ?? "Invité Anonyme",
                 MessageVisiteur = string.Empty,
                 StatusReservation = "Validée"
             };
 
-            // On envoie le modèle Infra tout propre au repository Dapper
             _articleRepository.CreateReservation(infraReservation);
 
             await Task.CompletedTask;
         }
 
-        // 7. Obtenir les détails d'une liaison
         public async Task<ListeDeNaissance.Core.Models.PresenceArticleDansListe?> ObtenirPresenceArticleAsync(int presenceArticleId)
         {
             var infraPresence = _articleRepository.GetPresenceArticleById(presenceArticleId);
